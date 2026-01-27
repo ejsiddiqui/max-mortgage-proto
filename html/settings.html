@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings | Max Mortgage</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/custom.css">
+
+    <!-- Tailwind Config -->
+    <script src="assets/js/theme.js"></script>
+</head>
+
+<body class="min-h-screen bg-navy-50">
+    <!-- Sidebar Container -->
+    <div id="sidebar"></div>
+
+    <!-- Main Content -->
+    <div class="ml-64 min-h-screen">
+        <!-- Header Container -->
+        <div id="header"></div>
+
+        <!-- Page Content -->
+        <main class="p-8">
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-navy-800">Settings</h1>
+                <p class="text-sm text-navy-500 mt-1">Manage your account and brokerage preferences</p>
+            </div>
+
+            <!-- Settings Container -->
+            <div id="settings-container">
+                <!-- Content injected by app.js renderSettings() -->
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="assets/js/app.js"></script>
+</body>
+
+</html>
+

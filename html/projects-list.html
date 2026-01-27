@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Projects | Max Mortgage</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/custom.css">
+
+    <!-- Tailwind Config -->
+    <script src="assets/js/theme.js"></script>
+</head>
+
+<body class="min-h-screen bg-navy-50">
+    <!-- Sidebar Container -->
+    <div id="sidebar"></div>
+
+    <!-- Main Content -->
+    <div class="ml-64 min-h-screen">
+        <!-- Header Container -->
+        <div id="header"></div>
+
+        <!-- Page Content -->
+        <main class="p-8">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h1 class="text-2xl font-bold text-navy-800">Projects</h1>
+                    <p class="text-sm text-navy-500 mt-1">Manage and track all mortgage applications</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <a href="projects-kanban.html"
+                        class="p-2 bg-white border border-navy-200 rounded-lg text-navy-500 hover:text-navy-700 hover:bg-navy-50 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2">
+                            </path>
+                        </svg>
+                    </a>
+                    <div class="p-2 bg-navy-100 border border-navy-200 rounded-lg text-neon-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters Container -->
+            <div id="projects-filters"></div>
+
+            <!-- Projects Table -->
+            <div class="card bg-white shadow-sm border border-navy-200 rounded-xl overflow-hidden">
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Project ID</th>
+                                <th>Client</th>
+                                <th>Amount</th>
+                                <th>Stage</th>
+                                <th>Docs</th>
+                                <th>Agent</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="projects-list-table">
+                            <!-- Rows will be injected by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="px-6 py-4 border-t border-navy-200 flex items-center justify-between">
+                    <p class="text-sm text-navy-500">Showing <span class="font-medium">1</span> to <span
+                            class="font-medium">5</span> of <span class="font-medium">24</span> results</p>
+                    <div class="flex items-center gap-2">
+                        <button
+                            class="px-3 py-1.5 border border-navy-200 rounded-lg text-sm text-navy-600 hover:bg-navy-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled>Previous</button>
+                        <button
+                            class="px-3 py-1.5 border border-navy-200 rounded-lg text-sm text-navy-600 hover:bg-navy-50">Next</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="assets/js/app.js"></script>
+</body>
+
+</html>
+
