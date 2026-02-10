@@ -4,19 +4,14 @@
  */
 
 /**
- * Format currency with $ symbol and commas
- * @param {number} amount - The amount to format
- * @param {boolean} showCents - Whether to show cents (default: false)
- * @returns {string} Formatted currency string
+ * Format currency with AED symbol and millions suffix
+ * @param {number} amount - The amount in full (e.g. 2500000)
+ * @returns {string} Formatted currency string (e.g. "AED 2.50M")
  */
-export const formatCurrency = (amount, showCents = false) => {
-    if (amount === null || amount === undefined) return '-';
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: showCents ? 2 : 0,
-        maximumFractionDigits: showCents ? 2 : 0
-    }).format(amount);
+export const formatCurrency = (amount) => {
+    if (amount === null || amount === undefined) return 'AED 0.00M';
+    const millions = amount / 1000000;
+    return `AED ${millions.toFixed(2)}M`;
 };
 
 /**
@@ -112,24 +107,26 @@ export const getInitials = (name) => {
  */
 export const getStatusBadge = (status, type = 'project') => {
     const badges = {
-        // Project statuses
+        // Project statuses (PRD Section 10)
+        'Open': 'bg-blue-100 text-blue-700 border-blue-200',
         'Active': 'bg-emerald-100 text-emerald-700 border-emerald-200',
         'On Hold': 'bg-amber-100 text-amber-700 border-amber-200',
-        'Closed Won': 'bg-teal-100 text-teal-700 border-teal-200',
-        'Closed Lost': 'bg-red-100 text-red-700 border-red-200',
+        'Disbursed': 'bg-emerald-100 text-emerald-700 border-emerald-200',
+        'Closed': 'bg-slate-100 text-slate-700 border-slate-200',
 
-        // Stage statuses
+        // Stage names (PRD Section 5.1.1)
         'New': 'bg-blue-100 text-blue-700 border-blue-200',
-        'Qualified': 'bg-indigo-100 text-indigo-700 border-indigo-200',
+        'WIP': 'bg-indigo-100 text-indigo-700 border-indigo-200',
         'Docs Completed': 'bg-purple-100 text-purple-700 border-purple-200',
         'Submitted': 'bg-cyan-100 text-cyan-700 border-cyan-200',
-        'Decision': 'bg-orange-100 text-orange-700 border-orange-200',
-        'Disbursed': 'bg-emerald-100 text-emerald-700 border-emerald-200',
+        'FOL': 'bg-orange-100 text-orange-700 border-orange-200',
 
         // Document statuses
         'verified': 'bg-emerald-100 text-emerald-700 border-emerald-200',
+        'uploaded': 'bg-blue-100 text-blue-700 border-blue-200',
         'pending': 'bg-amber-100 text-amber-700 border-amber-200',
-        'rejected': 'bg-red-100 text-red-700 border-red-200'
+        'rejected': 'bg-red-100 text-red-700 border-red-200',
+        'missing': 'bg-slate-100 text-slate-700 border-slate-200'
     };
 
     const badgeClass = badges[status] || 'bg-slate-100 text-slate-700 border-slate-200';
@@ -146,15 +143,15 @@ export const getStatusBadge = (status, type = 'project') => {
 export const getStageBadge = (stage) => {
     const stageIcons = {
         'New': `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>`,
-        'Qualified': `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
+        'WIP': `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>`,
         'Docs Completed': `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>`,
         'Submitted': `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>`,
-        'Decision': `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
-        'Disbursed': `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+        'FOL': `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
+        'Disbursed': `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
+        'Closed': `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`
     };
 
-    const icon = stageIcons[stage] || '';
-    return `${getStatusBadge(stage)}`;
+    return getStatusBadge(stage);
 };
 
 /**

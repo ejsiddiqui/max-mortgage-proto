@@ -6,19 +6,20 @@
 // Project Stages
 export const STAGES = {
     NEW: 'New',
-    QUALIFIED: 'Qualified',
+    WIP: 'WIP',
     DOCS_COMPLETED: 'Docs Completed',
     SUBMITTED: 'Submitted',
-    DECISION: 'Decision',
-    DISBURSED: 'Disbursed'
+    FOL: 'FOL',
+    DISBURSED: 'Disbursed',
+    CLOSED: 'Closed'
 };
 
 // Project Status
 export const STATUS = {
+    OPEN: 'Open',
     ACTIVE: 'Active',
     ON_HOLD: 'On Hold',
-    CLOSED_WON: 'Closed Won',
-    CLOSED_LOST: 'Closed Lost'
+    DISBURSED: 'Disbursed'
 };
 
 // Loan Types
@@ -78,10 +79,12 @@ export const projects = [
         updatedAt: '2026-01-25T14:20:00Z',
         expectedCommission: 4850,
         timeline: {
-            t1_initialContact: '2026-01-10T09:30:00Z',
-            t2_qualified: '2026-01-12T11:00:00Z',
-            t3_docsComplete: '2026-01-25T14:20:00Z',
-            t4_submitted: null
+            wipStartedAt: '2026-01-12T11:00:00Z',
+            docsCompletedAt: '2026-01-25T14:20:00Z',
+            submittedAt: null,
+            folAt: null,
+            disbursedAt: null,
+            closedAt: null
         },
         documents: {
             required: [

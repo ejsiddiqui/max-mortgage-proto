@@ -8,22 +8,23 @@
     // DATA LAYER (Formerly data.js)
     // ==========================================
 
-    // Project Stages
+    // Project Stages (PRD Section 5.1.1)
     const STAGES = {
         NEW: 'New',
-        QUALIFIED: 'Qualified',
+        WIP: 'WIP',
         DOCS_COMPLETED: 'Docs Completed',
         SUBMITTED: 'Submitted',
-        DECISION: 'Decision',
-        DISBURSED: 'Disbursed'
+        FOL: 'FOL',
+        DISBURSED: 'Disbursed',
+        CLOSED: 'Closed'
     };
 
-    // Project Status
+    // Project Status (PRD Section 10)
     const STATUS = {
+        OPEN: 'Open',
         ACTIVE: 'Active',
         ON_HOLD: 'On Hold',
-        CLOSED_WON: 'Closed Won',
-        CLOSED_LOST: 'Closed Lost'
+        DISBURSED: 'Disbursed'
     };
 
     // Loan Types
@@ -34,6 +35,48 @@
         INVESTMENT: 'Investment Property',
         COMMERCIAL: 'Commercial'
     };
+
+    // Document Configuration (PRD Section 5.2.2)
+    const DOCUMENT_CONFIG = [
+        // Section A — Borrower Documents
+        { code: 'A1', label: 'Valid UAE ID', section: 'borrower', multiFile: true, required: true, selfEmployedOnly: false },
+        { code: 'A2', label: 'Valid Passport', section: 'borrower', multiFile: true, required: true, selfEmployedOnly: false },
+        { code: 'A3', label: 'Visa', section: 'borrower', multiFile: true, required: true, selfEmployedOnly: false },
+        { code: 'A4', label: 'DEWA Bill of current residence', section: 'borrower', multiFile: false, required: true, selfEmployedOnly: false },
+        { code: 'A5', label: 'Bank Account details', section: 'borrower', multiFile: false, required: true, selfEmployedOnly: false },
+        { code: 'A6', label: 'Existing Bank Account Statement for 12 months', section: 'borrower', multiFile: false, required: true, selfEmployedOnly: false },
+        { code: 'A7', label: 'Salary Certificate', section: 'borrower', multiFile: false, required: false, selfEmployedOnly: false },
+
+        // Section B — Company Documents (Self-Employed Only)
+        { code: 'B1', label: 'Trade License, MOA & AOA', section: 'company', multiFile: true, required: true, selfEmployedOnly: true },
+        { code: 'B2', label: 'Company Information / Activity', section: 'company', multiFile: false, required: true, selfEmployedOnly: true },
+        { code: 'B3', label: 'Bank Account Statement for 6 months', section: 'company', multiFile: false, required: true, selfEmployedOnly: true },
+        { code: 'B4', label: 'Company Profile / Website', section: 'company', multiFile: false, required: true, selfEmployedOnly: true },
+
+        // Section C — Asset Documents
+        { code: 'C1', label: 'Title Deed', section: 'asset', multiFile: true, required: true, selfEmployedOnly: false },
+        { code: 'C2', label: 'Affection / Site plan of plot/land', section: 'asset', multiFile: true, required: false, selfEmployedOnly: false },
+        { code: 'C3', label: 'Floor Plan or Approved Drawings', section: 'asset', multiFile: true, required: false, selfEmployedOnly: false },
+        { code: 'C4', label: 'Certificate of Completion / Completion Notice', section: 'asset', multiFile: true, required: false, selfEmployedOnly: false },
+        { code: 'C5', label: 'MOU or SPA or Initial Contract of Sale', section: 'asset', multiFile: true, required: false, selfEmployedOnly: false },
+        { code: 'C6', label: 'Form F', section: 'asset', multiFile: false, required: false, selfEmployedOnly: false, allowedTypes: ['application/pdf'] },
+        { code: 'C7', label: 'Developer Statement of Accounts', section: 'asset', multiFile: false, required: false, selfEmployedOnly: false },
+        { code: 'C8', label: 'Valuation Slip (to be PAID)', section: 'asset', multiFile: false, required: true, selfEmployedOnly: false },
+        { code: 'C9', label: 'Project Profile', section: 'asset', multiFile: false, required: false, selfEmployedOnly: false },
+
+        // Section D — Banking Documents
+        { code: 'D1', label: 'AECB Form for Individual (to be filled & signed)', section: 'bank', multiFile: false, required: true, selfEmployedOnly: false, allowedTypes: ['application/pdf'] },
+        { code: 'D2', label: 'AECB Form Company (to be filled & signed)', section: 'bank', multiFile: false, required: true, selfEmployedOnly: true, allowedTypes: ['application/pdf'] },
+        { code: 'D3', label: 'Bank Application Form (to be filled & signed)', section: 'bank', multiFile: false, required: true, selfEmployedOnly: false, allowedTypes: ['application/pdf'] },
+        { code: 'D4', label: 'PNWS Form (to be filled & signed)', section: 'bank', multiFile: false, required: true, selfEmployedOnly: false, allowedTypes: ['application/pdf'] },
+        { code: 'D5', label: 'Existing Asset Title Information', section: 'bank', multiFile: true, required: true, selfEmployedOnly: false },
+        { code: 'D6', label: 'Key Fact Statement — FAB Bundle T&C (to be signed)', section: 'bank', multiFile: false, required: false, selfEmployedOnly: false, allowedTypes: ['application/pdf'] },
+
+        // Section E — Lease of Target Asset
+        { code: 'E1', label: 'Trade License of Company or UAE ID of individual tenancy', section: 'lease', multiFile: true, required: true, selfEmployedOnly: false },
+        { code: 'E2', label: 'Tenancy or Ijary agreement (min AED 0.525m)', section: 'lease', multiFile: true, required: true, selfEmployedOnly: false },
+        { code: 'E3', label: 'Tenancy 4 Cheques', section: 'lease', multiFile: true, required: true, selfEmployedOnly: false }
+    ];
 
     // Agents
     const agents = [
@@ -61,141 +104,79 @@
         }
     ];
 
-    // Projects
+    // Projects (PRD Section 4.2)
     const projects = [
         {
-            id: 'PRJ-2026-001',
-            clientName: 'Michael & Jennifer Thompson',
+            id: 'MM-0001',
+            clientName: 'Michael Thompson',
             clientEmail: 'thompson.mj@gmail.com',
-            loanType: LOAN_TYPES.HOME_LOAN,
-            loanAmount: 485000,
+            loanType: 'Buyout',
+            loanAmount: 2500000,
+            borrowerType: 'salaried',
+            propertyProfile: 'Building',
             stage: STAGES.DOCS_COMPLETED,
             status: STATUS.ACTIVE,
             agentId: 'AGT001',
             updatedAt: '2026-01-25T14:20:00Z',
-            expectedCommission: 4850,
-            documents: {
-                stats: { completed: 6, outstanding: 3, percentage: 70 },
-                groups: [
-                    {
-                        title: 'Primary Identification',
-                        id: 'grp-1',
-                        items: [
-                            { id: 'doc-1', name: 'Passport_Thompson_2024.pdf', type: 'pdf', status: 'verified', date: '2024-03-05', size: '2.4 MB' },
-                            { id: 'doc-2', name: 'DriversLicense_Thompson.jpg', type: 'image', status: 'pending', date: '2024-03-05', size: '1.1 MB' },
-                            { id: 'doc-3', name: 'NationalID_Thompson_Front.jpg', type: 'image', status: 'missing', date: null, size: null }
-                        ]
-                    },
-                    {
-                        title: 'Financial Documents',
-                        id: 'grp-2',
-                        items: [
-                            { id: 'doc-4', name: 'BankStatement_Chase_Feb2024.pdf', type: 'pdf', status: 'verified', date: '2024-03-04', size: '0.8 MB' },
-                            { id: 'doc-5', name: 'TaxReturn_2023.pdf', type: 'pdf', status: 'rejected', date: '2024-03-01', size: '4.2 MB', note: 'Please upload all pages' },
-                            { id: 'doc-6', name: 'PaySlip_Google_Jan.pdf', type: 'pdf', status: 'verified', date: '2024-02-28', size: '0.5 MB' }
-                        ]
-                    },
-                    {
-                        title: 'Property Documents',
-                        id: 'grp-3',
-                        items: [
-                            { id: 'doc-7', name: 'SalesContract_Signed.pdf', type: 'pdf', status: 'verified', date: '2024-02-25', size: '5.1 MB' },
-                            { id: 'doc-8', name: 'Insurance_Quote.pdf', type: 'pdf', status: 'missing', date: null, size: null }
-                        ]
-                    }
-                ],
-                // Fallback for old code
-                required: [
-                    { name: 'Primary ID', status: 'verified' },
-                    { name: 'Financials', status: 'pending' },
-                    { name: 'Property', status: 'pending' },
-                ]
-            }
+            expectedCommission: 25000,
+            documents: { required: Array(24).fill({status: 'verified'}) }
         },
         {
-            id: 'PRJ-2026-002',
+            id: 'MM-0002',
             clientName: 'David Chen',
             clientEmail: 'david.chen@outlook.com',
-            loanType: LOAN_TYPES.REFINANCE,
-            loanAmount: 320000,
+            loanType: 'Equity Release',
+            loanAmount: 1200000,
+            borrowerType: 'self_employed',
+            propertyProfile: 'Land',
             stage: STAGES.SUBMITTED,
             status: STATUS.ACTIVE,
             agentId: 'AGT001',
             updatedAt: '2026-01-24T09:00:00Z',
-            expectedCommission: 3200,
-            documents: {
-                required: [
-                    { name: 'ID Verification', status: 'verified' },
-                    { name: 'Income Statement', status: 'verified' },
-                    { name: 'Bank Statements', status: 'verified' },
-                    { name: 'Employment Letter', status: 'verified' },
-                    { name: 'Current Mortgage Statement', status: 'verified' }
-                ]
-            }
+            expectedCommission: 12000,
+            documents: { required: Array(29).fill({status: 'verified'}) }
         },
         {
-            id: 'PRJ-2026-003',
+            id: 'MM-0003',
             clientName: 'Amanda Foster',
-            clientEmail: 'amanda.foster@gmail.com',
-            loanType: LOAN_TYPES.INVESTMENT,
-            loanAmount: 550000,
+            loanType: 'Buyout',
+            loanAmount: 5500000,
+            borrowerType: 'salaried',
+            propertyProfile: 'Building',
             stage: STAGES.NEW,
-            status: STATUS.ACTIVE,
+            status: STATUS.OPEN,
             agentId: 'AGT002',
             updatedAt: '2026-01-24T16:30:00Z',
-            expectedCommission: 5500,
-            documents: {
-                required: [
-                    { name: 'ID Verification', status: 'pending' },
-                    { name: 'Income Statement', status: 'pending' },
-                    { name: 'Bank Statements', status: 'pending' },
-                    { name: 'Employment Letter', status: 'pending' },
-                    { name: 'Investment Property Contract', status: 'pending' }
-                ]
-            }
+            expectedCommission: 55000,
+            documents: { required: [] }
         },
         {
-            id: 'PRJ-2026-004',
-            clientName: 'Robert & Lisa Martinez',
-            clientEmail: 'martinez.family@yahoo.com',
-            loanType: LOAN_TYPES.CONSTRUCTION,
-            loanAmount: 890000,
-            stage: STAGES.DECISION,
+            id: 'MM-0004',
+            clientName: 'Robert Martinez',
+            loanType: 'Buyout',
+            loanAmount: 8900000,
+            borrowerType: 'self_employed',
+            propertyProfile: 'Building',
+            stage: STAGES.FOL,
             status: STATUS.ACTIVE,
             agentId: 'AGT002',
             updatedAt: '2026-01-23T10:30:00Z',
-            expectedCommission: 8900,
-            documents: {
-                required: [
-                    { name: 'ID Verification', status: 'verified' },
-                    { name: 'Income Statement', status: 'verified' },
-                    { name: 'Bank Statements', status: 'verified' },
-                    { name: 'Employment Letter', status: 'verified' },
-                    { name: 'Construction Plans', status: 'verified' },
-                    { name: 'Builder Contract', status: 'verified' }
-                ]
-            }
+            expectedCommission: 89000,
+            documents: { required: Array(29).fill({status: 'verified'}) }
         },
         {
-            id: 'PRJ-2025-089',
+            id: 'MM-0005',
             clientName: 'Emily Watson',
-            clientEmail: 'emily.watson@protonmail.com',
-            loanType: LOAN_TYPES.HOME_LOAN,
-            loanAmount: 375000,
+            loanType: 'Buyout',
+            loanAmount: 3750000,
+            borrowerType: 'salaried',
+            propertyProfile: 'Land',
             stage: STAGES.DISBURSED,
-            status: STATUS.CLOSED_WON,
+            status: STATUS.DISBURSED,
             agentId: 'AGT001',
             updatedAt: '2026-01-15T11:00:00Z',
-            expectedCommission: 3750,
-            documents: {
-                required: [
-                    { name: 'ID Verification', status: 'verified' },
-                    { name: 'Income Statement', status: 'verified' },
-                    { name: 'Bank Statements', status: 'verified' },
-                    { name: 'Employment Letter', status: 'verified' },
-                    { name: 'Property Contract', status: 'verified' }
-                ]
-            }
+            expectedCommission: 37500,
+            documents: { required: Array(24).fill({status: 'verified'}) }
         }
     ];
 
@@ -280,14 +261,10 @@
     // ==========================================
 
     const utils = {
-        formatCurrency: (amount, showCents = false) => {
-            if (amount === null || amount === undefined) return '-';
-            return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
-                minimumFractionDigits: showCents ? 2 : 0,
-                maximumFractionDigits: showCents ? 2 : 0
-            }).format(amount);
+        formatCurrency: (amount) => {
+            if (amount === null || amount === undefined) return 'AED 0.00M';
+            const millions = amount / 1000000;
+            return `AED ${millions.toFixed(2)}M`;
         },
 
         formatRelativeTime: (dateString) => {
@@ -314,16 +291,16 @@
 
         getStatusBadge: (status) => {
             const badges = {
-                'Active': 'bg-neon-100 text-neon-700 border-neon-200',
+                'Open': 'bg-blue-100 text-blue-700 border-blue-200',
+                'Active': 'bg-emerald-100 text-emerald-700 border-emerald-200',
                 'On Hold': 'bg-amber-100 text-amber-700 border-amber-200',
-                'Closed Won': 'bg-neon-100 text-neon-700 border-neon-200',
-                'Closed Lost': 'bg-red-100 text-red-700 border-red-200',
                 'New': 'bg-blue-100 text-blue-700 border-blue-200',
-                'Qualified': 'bg-navy-100 text-navy-700 border-navy-200',
+                'WIP': 'bg-indigo-100 text-indigo-700 border-indigo-200',
                 'Docs Completed': 'bg-purple-100 text-purple-700 border-purple-200',
                 'Submitted': 'bg-cyan-100 text-cyan-700 border-cyan-200',
-                'Decision': 'bg-orange-100 text-orange-700 border-orange-200',
-                'Disbursed': 'bg-neon-100 text-neon-700 border-neon-200'
+                'FOL': 'bg-orange-100 text-orange-700 border-orange-200',
+                'Disbursed': 'bg-emerald-100 text-emerald-700 border-emerald-200',
+                'Closed': 'bg-slate-100 text-slate-700 border-slate-200'
             };
             const badgeClass = badges[status] || 'bg-navy-100 text-navy-700 border-navy-200';
             return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${badgeClass}">${status}</span>`;
@@ -365,8 +342,8 @@
 
         // Helper functions for Project Detail View
         getTrackingEvents: (currentStage) => {
-            const allStages = ['New', 'Qualified', 'Docs Completed', 'Submitted', 'Decision', 'Disbursed'];
-            const currentIndex = allStages.indexOf(currentStage) === -1 ? 2 : allStages.indexOf(currentStage);
+            const allStages = ['New', 'WIP', 'Docs Completed', 'Submitted', 'FOL', 'Disbursed', 'Closed'];
+            const currentIndex = allStages.indexOf(currentStage) === -1 ? 0 : allStages.indexOf(currentStage);
 
             return allStages.map((stage, index) => {
                 let status = 'pending';
@@ -635,6 +612,15 @@
         },
 
         renderHeader: function () {
+            const path = window.location.pathname;
+            let title = 'Dashboard';
+            if (path.includes('projects-list')) title = 'Project Inventory';
+            else if (path.includes('projects-kanban')) title = 'Pipeline Board';
+            else if (path.includes('project-detail')) title = 'Project Detail';
+            else if (path.includes('project-documents')) title = 'Document Workspace';
+            else if (path.includes('agents')) title = 'Agents Directory';
+            else if (path.includes('settings')) title = 'Settings';
+
             document.getElementById('header').innerHTML = `
                 <header class="bg-white border-b border-navy-200 px-4 md:px-8 py-4 flex items-center justify-between sticky top-0 z-30">
                     <div class="flex items-center gap-4">
@@ -642,7 +628,7 @@
                              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                         </button>
                         <div>
-                            <h1 class="text-2xl font-bold text-navy-800 hidden md:block">Dashboard</h1>
+                            <h1 class="text-2xl font-bold text-navy-800 hidden md:block">${title}</h1>
                             <h1 class="text-xl font-bold text-navy-800 md:hidden">Max Mortgage</h1>
                             <p class="text-sm text-navy-500 mt-0.5 hidden md:block">Welcome back, Sarah!</p>
                         </div>
@@ -724,43 +710,99 @@
 
             // Compute KPIs
             const totalProjects = projects.length;
-            const activeProjects = projects.filter(p => p.status === STATUS.ACTIVE).length;
-            const closedProjects = projects.filter(p => p.status === STATUS.CLOSED_WON).length;
-            const totalCommission = projects.filter(p => p.status === STATUS.CLOSED_WON).reduce((sum, p) => sum + p.expectedCommission, 0);
+            const activeProjects = projects.filter(p => p.status === STATUS.ACTIVE || p.status === STATUS.OPEN);
+            const activeValue = activeProjects.reduce((sum, p) => sum + p.loanAmount, 0);
+            
+            const disbursedProjects = projects.filter(p => p.stage === STAGES.DISBURSED);
+            const disbursedValue = disbursedProjects.reduce((sum, p) => sum + p.loanAmount, 0);
 
-            // Render KPI Cards
-            const cards = [
-                { title: 'Total Projects', value: totalProjects, change: '+2 this month', color: 'blue' },
-                { title: 'Active Projects', value: activeProjects, change: '80% of pipeline', color: 'neon' },
-                { title: 'Closed Won', value: closedProjects, change: '+1 vs last month', color: 'purple' },
-                { title: 'Commission', value: utils.formatCurrency(totalCommission), change: 'YTD', color: 'amber' }
-            ];
+            const buildingCount = projects.filter(p => p.propertyProfile === 'Building').length;
+            const landCount = projects.filter(p => p.propertyProfile === 'Land').length;
 
-            document.getElementById('kpi-cards').innerHTML = cards.map(card => `
-                <div class="card p-6 border border-navy-200 bg-white rounded-xl shadow-sm hover:shadow-md transition-all">
-                    <p class="text-sm font-medium text-navy-500">${card.title}</p>
-                    <p class="text-3xl font-bold text-navy-800 mt-2">${card.value}</p>
-                    <p class="text-xs mt-2 text-${card.color}-600">${card.change}</p>
+            // Render KPI Cards (Row 1)
+            document.getElementById('kpi-cards').innerHTML = `
+                <!-- Dashboard Greeting -->
+                <div class="card p-6 border border-navy-200 bg-gradient-to-br from-navy-800 to-navy-900 text-white rounded-xl shadow-lg relative overflow-hidden">
+                    <div class="relative z-10">
+                        <p class="text-navy-300 text-xs font-medium uppercase tracking-wider">Welcome back</p>
+                        <h2 class="text-2xl font-bold mt-1">Sarah Mitchell</h2>
+                        <p class="text-navy-400 text-xs mt-4">${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                        <a href="projects-kanban.html" class="inline-flex items-center gap-2 mt-6 text-xs font-bold text-neon-400 hover:text-neon-300 transition-colors uppercase tracking-widest">
+                            View Pipeline
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7-7 7"></path></svg>
+                        </a>
+                    </div>
+                    <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-neon-500/10 rounded-full blur-3xl"></div>
                 </div>
-            `).join('');
+
+                <!-- YTD Widget -->
+                <div class="card p-6 border border-navy-200 bg-white rounded-xl shadow-sm">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600">
+                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <span class="text-xs font-bold text-navy-500 uppercase tracking-wider">YTD Disbursed</span>
+                    </div>
+                    <p class="text-3xl font-bold text-navy-800">${utils.formatCurrency(disbursedValue)}</p>
+                    <p class="text-xs text-navy-400 mt-2"><span class="text-emerald-600 font-bold">${disbursedProjects.length}</span> cases closed</p>
+                </div>
+
+                <!-- Active Widget -->
+                <div class="card p-6 border border-navy-200 bg-white rounded-xl shadow-sm">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600">
+                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                        </div>
+                        <span class="text-xs font-bold text-navy-500 uppercase tracking-wider">Active Pipeline</span>
+                    </div>
+                    <p class="text-3xl font-bold text-navy-800">${utils.formatCurrency(activeValue)}</p>
+                    <p class="text-xs text-navy-400 mt-2"><span class="text-blue-600 font-bold">${activeProjects.length}</span> open applications</p>
+                </div>
+
+                <!-- Active Profile Widget -->
+                <div class="card p-6 border border-navy-200 bg-white rounded-xl shadow-sm">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center text-purple-600">
+                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                        </div>
+                        <span class="text-xs font-bold text-navy-500 uppercase tracking-wider">Portfolio Split</span>
+                    </div>
+                    <div class="flex items-end justify-between">
+                        <div class="space-y-1">
+                            <p class="text-xs text-navy-500 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-navy-800"></span>
+                                Building: <span class="font-bold text-navy-800">${buildingCount}</span>
+                            </p>
+                            <p class="text-xs text-navy-500 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-neon-500"></span>
+                                Land: <span class="font-bold text-navy-800">${landCount}</span>
+                            </p>
+                        </div>
+                        <div class="text-right">
+                             <p class="text-xl font-bold text-navy-800">${Math.round((buildingCount/(buildingCount+landCount||1))*100)}%</p>
+                             <p class="text-[10px] text-navy-400">Residential</p>
+                        </div>
+                    </div>
+                </div>
+            `;
 
             // Render Active Projects Table
             const activeTable = document.getElementById('projects-table-body');
             if (activeTable) {
-                const activeList = projects.filter(p => p.status === STATUS.ACTIVE).slice(0, 5);
+                const activeList = projects.filter(p => p.status === STATUS.ACTIVE || p.status === STATUS.OPEN).slice(0, 5);
                 activeTable.innerHTML = activeList.map(p => {
-                    const completion = utils.getDocumentCompletion(p.documents.required);
+                    const completion = utils.getDocumentCompletion(p.documents.required || []);
                     return `
                         <tr class="hover:bg-navy-50 transition-colors border-b border-navy-100 last:border-0">
                             <td class="p-4">
-                                <a href="#" class="font-medium text-neon-600 hover:text-neon-700 block">${p.id}</a>
-                                <span class="text-xs text-navy-500">${p.loanType}</span>
+                                <a href="project-detail.html?id=${p.id}" class="font-medium text-neon-600 hover:text-neon-700 block text-xs font-mono">${p.id}</a>
+                                <span class="text-[10px] text-navy-500">${p.loanType}</span>
                             </td>
                             <td class="p-4">
-                                <div class="font-medium text-navy-700">${p.clientName.split('&')[0]}</div>
-                                <div class="text-xs text-navy-400">${utils.formatRelativeTime(p.updatedAt)}</div>
+                                <div class="font-medium text-navy-700 text-sm">${p.clientName.split('&')[0]}</div>
+                                <div class="text-[10px] text-navy-400">${utils.formatRelativeTime(p.updatedAt)}</div>
                             </td>
-                            <td class="p-4 font-mono text-sm font-semibold text-navy-700">${utils.formatCurrency(p.loanAmount)}</td>
+                            <td class="p-4 font-mono text-xs font-semibold text-navy-700">${utils.formatCurrency(p.loanAmount)}</td>
                             <td class="p-4">${utils.getStatusBadge(p.stage)}</td>
                             <td class="p-4 px-6 w-32">${utils.getProgressBar(completion)}</td>
                         </tr>
@@ -768,91 +810,118 @@
                 }).join('');
             }
 
-            // Render Activity Feed
+            // Render Activity Feed (Row 3)
             const feedContainer = document.getElementById('activity-feed');
             if (feedContainer) {
-                feedContainer.innerHTML = activityLogs.slice(0, 8).map(log => `
+                feedContainer.innerHTML = activityLogs.slice(0, 5).map(log => `
                     <div class="flex gap-3 pb-4 relative">
                         <div class="flex-shrink-0 mt-1">${utils.getActionIcon(log.action)}</div>
-                        <div>
-                            <p class="text-sm font-medium text-navy-700">${log.action}</p>
-                            <p class="text-xs text-navy-500">${log.description}</p>
-                            <p class="text-[10px] text-navy-400 mt-1">${utils.formatRelativeTime(log.timestamp)}</p>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-medium text-navy-700 truncate">${log.action} <span class="text-navy-400 font-normal">on</span> <span class="text-neon-600 font-mono">${log.projectId}</span></p>
+                            <p class="text-[10px] text-navy-500 mt-0.5 line-clamp-1">${log.description}</p>
+                            <p class="text-[9px] text-navy-400 mt-1">${utils.formatRelativeTime(log.timestamp)}</p>
                         </div>
                     </div>
                 `).join('');
             }
 
-            // Render Stage Breakdown
+            // Render Stage Breakdown (Row 2)
             const stageContainer = document.getElementById('stage-breakdown');
             if (stageContainer) {
                 const stageColors = {
                     'New': 'bg-blue-500',
-                    'Qualified': 'bg-navy-500',
+                    'WIP': 'bg-indigo-500',
                     'Docs Completed': 'bg-purple-500',
                     'Submitted': 'bg-cyan-500',
-                    'Decision': 'bg-orange-500',
-                    'Disbursed': 'bg-neon-500'
+                    'FOL': 'bg-orange-500',
+                    'Disbursed': 'bg-emerald-500',
+                    'Closed': 'bg-slate-500'
                 };
 
                 const stages = Object.values(STAGES);
-                const totalActiveCount = projects.filter(p => p.status === STATUS.ACTIVE).length;
+                const totalActiveCount = projects.length;
 
                 stageContainer.innerHTML = stages.map(stage => {
-                    const count = projects.filter(p => p.stage === stage && p.status === STATUS.ACTIVE).length;
+                    const count = projects.filter(p => p.stage === stage).length;
                     const percentage = totalActiveCount > 0 ? Math.round((count / totalActiveCount) * 100) : 0;
 
                     return `
                         <div class="flex items-center gap-3">
-                            <div class="w-24 text-xs font-medium text-navy-600 truncate">${stage}</div>
-                            <div class="flex-1 h-2 bg-navy-100 rounded-full overflow-hidden">
+                            <div class="w-24 text-[10px] font-bold text-navy-500 uppercase tracking-tight truncate">${stage}</div>
+                            <div class="flex-1 h-1.5 bg-navy-100 rounded-full overflow-hidden">
                                 <div class="h-full ${stageColors[stage] || 'bg-navy-400'} rounded-full transition-all duration-500" style="width: ${percentage}%"></div>
                             </div>
-                            <div class="w-8 text-xs font-medium text-navy-500 text-right">${count}</div>
+                            <div class="w-6 text-[10px] font-bold text-navy-700 text-right">${count}</div>
                         </div>
                     `;
                 }).join('');
             }
 
-            // Render Agent Performance
-            const agentContainer = document.getElementById('agent-performance');
-            if (agentContainer) {
-                agentContainer.innerHTML = agents.map(agent => `
-                    <div class="flex items-center gap-3 p-3 rounded-xl bg-navy-50 hover:bg-navy-100 transition-colors border border-transparent hover:border-navy-100">
-                        <div class="w-10 h-10 bg-gradient-to-br from-navy-600 to-navy-700 rounded-xl flex items-center justify-center text-white text-sm font-medium">
-                            ${utils.getInitials(agent.name)}
+            // Render Avg Milestone Durations (Row 2)
+            const avgDurationsContainer = document.getElementById('avg-durations');
+            if (avgDurationsContainer) {
+                const durations = [
+                    { label: 'T1 Speed to Start', value: '1.2d' },
+                    { label: 'T2 Doc Collection', value: '14.5d' },
+                    { label: 'T3 Prep & Submit', value: '2.1d' },
+                    { label: 'T4 Bank Processing', value: '8.4d' },
+                    { label: 'T5 FOL to Disbursed', value: '12.0d' }
+                ];
+
+                avgDurationsContainer.innerHTML = `
+                    <div class="space-y-4">
+                        ${durations.map(d => `
+                            <div class="flex justify-between items-center border-b border-navy-50 pb-2 last:border-0">
+                                <span class="text-xs text-navy-500 font-medium">${d.label}</span>
+                                <span class="text-sm font-bold text-navy-800 font-mono">${d.value}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            // Render Referral Agencies (Row 3)
+            const referralContainer = document.getElementById('referral-agencies');
+            if (referralContainer) {
+                const agencies = [
+                    { name: 'Epyc Digital', active: 3, disbursed: 1, value: 4500000 },
+                    { name: 'Prime Realty', active: 2, disbursed: 0, value: 2800000 },
+                    { name: 'Elite Assets', active: 5, disbursed: 2, value: 9200000 }
+                ];
+
+                referralContainer.innerHTML = agencies.map(agency => `
+                    <div class="flex items-center gap-3 p-3 rounded-xl bg-navy-50/50 hover:bg-navy-100 transition-colors border border-transparent">
+                        <div class="w-9 h-9 bg-navy-100 rounded-lg flex items-center justify-center text-navy-600 text-xs font-bold uppercase">
+                            ${agency.name.substring(0, 2)}
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-navy-700 truncate">${agent.name}</p>
-                            <p class="text-xs text-navy-500">${agent.activeProjects} active • ${agent.closedThisMonth} closed</p>
+                            <p class="text-xs font-bold text-navy-700 truncate">${agency.name}</p>
+                            <p class="text-[10px] text-navy-400">${agency.active} active • ${agency.disbursed} disbursed</p>
                         </div>
                         <div class="text-right">
-                            <p class="font-mono text-sm font-semibold text-neon-600">${utils.formatCurrency(agent.commissionYTD)}</p>
-                            <p class="text-xs text-navy-400">YTD</p>
+                            <p class="text-xs font-bold text-navy-800">${utils.formatCurrency(agency.value)}</p>
+                            <p class="text-[9px] text-navy-400 uppercase font-bold tracking-tighter">Pipeline</p>
                         </div>
                     </div>
                 `).join('');
             }
 
-            // Render Pending Actions
-            const pendingContainer = document.getElementById('pending-actions');
-            if (pendingContainer) {
-                const pendingActions = [
-                    { title: 'Employment Letter needed', project: 'PRJ-2026-001', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>', iconClass: 'text-red-500' },
-                    { title: 'Follow up with Chase Bank', project: 'PRJ-2026-004', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>', iconClass: 'text-amber-500' },
-                    { title: 'Review new lead documents', project: 'PRJ-2026-003', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>', iconClass: 'text-blue-500' }
-                ];
-
-                pendingContainer.innerHTML = pendingActions.map(action => `
-                    <div class="flex items-start gap-3 p-3 rounded-lg hover:bg-navy-50 transition-colors cursor-pointer group border border-transparent hover:border-navy-100">
-                        <svg class="w-4 h-4 mt-0.5 ${action.iconClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24">${action.icon}</svg>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm text-navy-700 group-hover:text-navy-900 font-medium">${action.title}</p>
-                            <p class="font-mono text-[10px] text-neon-600 mt-0.5">${action.project}</p>
+            // Render Agent Performance (Row 3)
+            const agentContainer = document.getElementById('agent-performance');
+            if (agentContainer) {
+                agentContainer.innerHTML = agents.map(agent => `
+                    <div class="flex items-center gap-3 p-3 rounded-xl bg-navy-50/50 hover:bg-navy-100 transition-colors border border-transparent">
+                        <div class="w-9 h-9 bg-navy-800 rounded-lg flex items-center justify-center text-white text-xs font-bold">
+                            ${utils.getInitials(agent.name)}
                         </div>
-                        <svg class="w-4 h-4 text-navy-300 group-hover:text-navy-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-bold text-navy-700 truncate">${agent.name}</p>
+                            <p class="text-[10px] text-navy-400">${agent.activeProjects} active • ${agent.closedThisMonth} closed</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs font-bold text-emerald-600">${utils.formatCurrency(agent.commissionYTD * 100)}</p>
+                            <p class="text-[9px] text-navy-400 uppercase font-bold tracking-tighter">Active Val</p>
+                        </div>
                     </div>
                 `).join('');
             }
@@ -946,11 +1015,12 @@
 
                 let stageColor = 'border-navy-200';
                 if (stage === 'New') stageColor = 'border-blue-200';
-                if (stage === 'Qualified') stageColor = 'border-navy-200';
+                if (stage === 'WIP') stageColor = 'border-indigo-200';
                 if (stage === 'Docs Completed') stageColor = 'border-purple-200';
                 if (stage === 'Submitted') stageColor = 'border-cyan-200';
-                if (stage === 'Decision') stageColor = 'border-orange-200';
-                if (stage === 'Disbursed') stageColor = 'border-neon-200';
+                if (stage === 'FOL') stageColor = 'border-orange-200';
+                if (stage === 'Disbursed') stageColor = 'border-emerald-200';
+                if (stage === 'Closed') stageColor = 'border-slate-200';
 
                 return `
                     <div class="kanban-column flex-shrink-0 w-80 flex flex-col h-full bg-navy-50/50 rounded-xl border border-navy-200/50" data-stage="${stage}">
@@ -971,26 +1041,41 @@
                                     <div class="bg-white p-4 rounded-xl border border-navy-200 shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing group draggable-card" draggable="true" data-id="${p.id}">
                                         <div class="flex justify-between items-start mb-2">
                                             <span class="text-[10px] font-mono text-navy-400 bg-navy-50 px-1.5 py-0.5 rounded border border-navy-100">${p.id}</span>
-                                            <button class="text-navy-300 hover:text-navy-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
-                                            </button>
+                                            ${utils.getStatusBadge(p.status)}
                                         </div>
                                         
-                                        <h4 class="font-medium text-navy-800 text-sm mb-1 line-clamp-1 pointer-events-none">${p.clientName}</h4>
-                                        <div class="flex items-center gap-1.5 mb-3 pointer-events-none">
-                                            <span class="text-xs text-navy-500">${p.loanType}</span>
-                                            <span class="text-navy-300">•</span>
-                                            <span class="text-xs font-mono font-medium text-neon-600">${utils.formatCurrency(p.loanAmount)}</span>
+                                        <h4 class="font-bold text-navy-800 text-sm mb-1 line-clamp-1 pointer-events-none">${p.clientName}</h4>
+                                        <div class="flex items-center gap-1.5 mb-2 pointer-events-none">
+                                            <span class="text-[10px] px-1.5 py-0.5 bg-navy-50 text-navy-600 rounded font-medium">${p.borrowerType === 'salaried' ? 'Salaried' : 'Self-Employed'}</span>
+                                            <span class="text-[10px] text-navy-400">${p.bank || 'FAB'}</span>
+                                        </div>
+
+                                        <div class="flex items-center justify-between mb-3 pointer-events-none">
+                                            <span class="text-sm font-mono font-bold text-neon-600">${utils.formatCurrency(p.loanAmount)}</span>
+                                            <span class="text-[10px] text-navy-400">12d in stage</span>
+                                        </div>
+
+                                        <!-- Doc Progress -->
+                                        <div class="mb-4 pointer-events-none">
+                                            <div class="flex justify-between text-[9px] mb-1">
+                                                <span class="text-navy-400 font-bold uppercase">Docs</span>
+                                                <span class="text-navy-600 font-bold">${utils.getDocumentCompletion(p.documents.required)}%</span>
+                                            </div>
+                                            <div class="w-full h-1 bg-navy-50 rounded-full overflow-hidden">
+                                                <div class="h-full bg-navy-800 rounded-full" style="width: ${utils.getDocumentCompletion(p.documents.required)}%"></div>
+                                            </div>
                                         </div>
 
                                         <div class="flex items-center justify-between pt-3 border-t border-navy-50 pointer-events-none">
                                             <div class="flex items-center gap-2">
-                                                <div class="w-6 h-6 rounded-full bg-navy-100 flex items-center justify-center text-[10px] font-medium text-navy-600" title="${agent?.name}">
+                                                <div class="w-6 h-6 rounded-full bg-navy-800 flex items-center justify-center text-[10px] font-bold text-white" title="${agent?.name}">
                                                     ${utils.getInitials(agent?.name)}
                                                 </div>
-                                                <div class="text-[10px] text-navy-400">${utils.formatRelativeTime(p.updatedAt)}</div>
+                                                <span class="text-[10px] text-navy-500 font-medium">${agent?.name.split(' ')[0]}</span>
                                             </div>
-                                            ${utils.getStatusBadge(p.status)}
+                                            <button class="text-navy-300 hover:text-navy-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+                                            </button>
                                         </div>
                                     </div>
                                 `;
@@ -1061,66 +1146,168 @@
             };
 
             const renderOverview = () => {
-                return `
-                    <!-- Top Stats -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                        <div class="p-4 bg-white rounded-xl border border-navy-100 shadow-sm">
-                            <p class="text-xs text-navy-400 mb-1">Housing status</p>
-                            <span class="bg-navy-50 text-navy-700 text-xs px-2 py-1 rounded font-medium">Rent</span>
-                        </div>
-                        <div class="p-4 bg-white rounded-xl border border-navy-100 shadow-sm">
-                            <p class="text-xs text-navy-400 mb-1">Borrowing power</p>
-                            <p class="text-sm font-bold text-navy-800">${utils.formatCurrency(project.loanAmount * 2.5)}</p>
-                        </div>
-                        <div class="p-4 bg-white rounded-xl border border-navy-100 shadow-sm">
-                            <p class="text-xs text-navy-400 mb-1">Loan amount</p>
-                            <p class="text-sm font-bold text-navy-800">${utils.formatCurrency(project.loanAmount)}</p>
-                        </div>
-                        <div class="p-4 bg-white rounded-xl border border-navy-100 shadow-sm">
-                            <p class="text-xs text-navy-400 mb-1">Annual Income</p>
-                            <p class="text-sm font-bold text-navy-800">$185,000</p>
-                        </div>
+                const statusActions = `
+                    <div class="flex items-center gap-3 mt-6 pt-6 border-t border-navy-50">
+                        ${project.status === STATUS.ON_HOLD ? `
+                            <button onclick="window.updateProjectStatus('active')" class="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 transition-all shadow-sm">Activate Project</button>
+                        ` : `
+                            ${project.status !== STATUS.DISBURSED ? `
+                                <button onclick="window.updateProjectStatus('on_hold')" class="px-4 py-2 bg-amber-500 text-white text-xs font-bold rounded-lg hover:bg-amber-600 transition-all shadow-sm">Put On Hold</button>
+                            ` : ''}
+                        `}
+                        ${project.stage !== STAGES.CLOSED ? `
+                            <button onclick="window.updateProjectStatus('closed')" class="px-4 py-2 bg-navy-800 text-white text-xs font-bold rounded-lg hover:bg-navy-900 transition-all shadow-sm">Close Project</button>
+                        ` : ''}
                     </div>
+                `;
 
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <!-- AI Eligibility -->
-                        <div class="card p-6 bg-[#F0FDF4] border border-neon-100 rounded-xl">
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-sm font-semibold text-navy-800">AI Assessed Eligibility</h3>
-                                <div class="flex items-end gap-1">
-                                    <span class="text-3xl font-bold text-navy-800">${eligibilityScore}</span>
-                                    <span class="text-sm text-navy-500 mb-1">/100</span>
+                return `
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2">
+                            <!-- Top Stats -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                <div class="p-4 bg-white rounded-xl border border-navy-100 shadow-sm">
+                                    <p class="text-[10px] text-navy-400 uppercase font-bold mb-1">Borrower Type</p>
+                                    <span class="bg-navy-50 text-navy-700 text-xs px-2 py-1 rounded font-bold">${project.borrowerType === 'salaried' ? 'Salaried' : 'Self-Employed'}</span>
+                                </div>
+                                <div class="p-4 bg-white rounded-xl border border-navy-100 shadow-sm">
+                                    <p class="text-[10px] text-navy-400 uppercase font-bold mb-1">Loan Amount</p>
+                                    <p class="text-lg font-bold text-navy-800">${utils.formatCurrency(project.loanAmount)}</p>
+                                </div>
+                                <div class="p-4 bg-white rounded-xl border border-navy-100 shadow-sm">
+                                    <p class="text-[10px] text-navy-400 uppercase font-bold mb-1">Property Profile</p>
+                                    <p class="text-lg font-bold text-navy-800">${project.propertyProfile || 'Building'}</p>
                                 </div>
                             </div>
-                            <div class="w-full h-2 bg-white rounded-full overflow-hidden mb-6 border border-neon-100">
-                                <div class="h-full bg-neon-500 rounded-full" style="width: ${eligibilityScore}%"></div>
-                            </div>
-                            <div class="space-y-4">
-                                <div class="flex justify-between text-sm"><span class="text-navy-500">Credit Score</span><span class="font-medium text-navy-800">720</span></div>
-                                <div class="flex justify-between text-sm"><span class="text-navy-500">DTI Ratio</span><span class="font-medium text-neon-600">Low Risk</span></div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <!-- AI Eligibility -->
+                                <div class="card p-6 bg-[#F0FDF4] border border-neon-100 rounded-xl">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h3 class="text-xs font-bold text-navy-800 uppercase tracking-wider">Assessed Eligibility</h3>
+                                        <div class="flex items-end gap-1">
+                                            <span class="text-3xl font-bold text-navy-800">${eligibilityScore}</span>
+                                            <span class="text-xs text-navy-500 mb-1">/100</span>
+                                        </div>
+                                    </div>
+                                    <div class="w-full h-2 bg-white rounded-full overflow-hidden mb-6 border border-neon-100">
+                                        <div class="h-full bg-neon-500 rounded-full" style="width: ${eligibilityScore}%"></div>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <div class="flex justify-between text-xs"><span class="text-navy-500 font-medium">Credit Score</span><span class="font-bold text-navy-800">720</span></div>
+                                        <div class="flex justify-between text-xs"><span class="text-navy-500 font-medium">DTI Ratio</span><span class="font-bold text-neon-600">Low Risk</span></div>
+                                    </div>
+                                </div>
+
+                                <!-- Project Info -->
+                                <div class="card p-6 bg-white border border-navy-100 rounded-xl">
+                                     <h3 class="text-xs font-bold text-navy-800 uppercase tracking-wider mb-4">Meta Information</h3>
+                                     <div class="space-y-3">
+                                        <div class="flex justify-between text-xs"><span class="text-navy-400 font-medium">Business Type</span><span class="font-bold text-navy-700">${project.loanType}</span></div>
+                                        <div class="flex justify-between text-xs"><span class="text-navy-400 font-medium">Assigned Agent</span><span class="font-bold text-navy-700">${agent?.name}</span></div>
+                                        <div class="flex justify-between text-xs"><span class="text-navy-400 font-medium">Last Updated</span><span class="font-bold text-navy-700">${utils.formatRelativeTime(project.updatedAt)}</span></div>
+                                     </div>
+                                     ${statusActions}
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Matching Products -->
-                        <div class="card p-6 bg-white border border-navy-100 rounded-xl">
-                             <h3 class="text-sm font-semibold text-navy-800 mb-4">Matching Products</h3>
-                             <div class="space-y-3">
-                                ${matchingProducts.slice(0, 3).map(prod => `
-                                    <div class="flex items-center justify-between p-3 border border-navy-50 rounded-lg hover:border-navy-200 transition-colors">
-                                        <div>
-                                            <p class="text-sm font-medium text-navy-800">${prod.name}</p>
-                                            <p class="text-xs text-navy-400">${prod.rate}% p.a.</p>
-                                        </div>
-                                        <button class="text-xs font-medium text-navy-600 bg-navy-50 hover:bg-navy-100 px-3 py-1.5 rounded-lg">Select</button>
-                                    </div>
-                                `).join('')}
-                             </div>
+                        <!-- Sidebar Info -->
+                        <div class="space-y-6">
+                            <div class="card p-6 bg-white border border-navy-100 rounded-xl">
+                                <h3 class="text-xs font-bold text-navy-800 uppercase tracking-wider mb-4">Document Progress</h3>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-2xl font-bold text-navy-800">${completion}%</span>
+                                    <span class="text-[10px] font-bold text-navy-400 uppercase">${project.documents.required.length} Required</span>
+                                </div>
+                                ${utils.getProgressBar(completion)}
+                                <a href="project-documents.html?id=${projectId}" class="block w-full mt-6 text-center py-2 bg-navy-50 text-navy-600 text-xs font-bold rounded-lg hover:bg-navy-100 transition-all border border-navy-100">Manage Documents</a>
+                            </div>
                         </div>
                     </div>
                 `;
             };
 
+            // Status Control Event Handlers
+            window.updateProjectStatus = (newStatus) => {
+                if (newStatus === 'on_hold') {
+                    App.showModal({
+                        title: 'Put Project On Hold',
+                        content: `
+                            <div class="space-y-4">
+                                <p class="text-sm text-navy-500">Please provide a reason for putting this project on hold.</p>
+                                <textarea id="on-hold-reason-input" class="w-full h-24 px-4 py-2 bg-white border border-navy-200 rounded-lg focus:outline-none focus:border-neon-500 text-navy-700" placeholder="e.g. Awaiting client's tax return..."></textarea>
+                            </div>
+                        `,
+                        confirmText: 'Put On Hold',
+                        onConfirm: () => {
+                            const reason = document.getElementById('on-hold-reason-input').value;
+                            if (!reason) {
+                                App.showToast('Reason is required', 'error');
+                                return;
+                            }
+                            project.status = STATUS.ON_HOLD;
+                            project.onHoldReason = reason;
+                            project.updatedAt = new Date().toISOString();
+                            App.showToast('Project is now On-Hold');
+                            window.switchTab('Overview');
+                            document.getElementById('header-status-badge').innerHTML = utils.getStatusBadge(project.status);
+                        }
+                    });
+                } else if (newStatus === 'active') {
+                    project.status = STATUS.ACTIVE;
+                    delete project.onHoldReason;
+                    project.updatedAt = new Date().toISOString();
+                    App.showToast('Project reactivated');
+                    window.switchTab('Overview');
+                    document.getElementById('header-status-badge').innerHTML = utils.getStatusBadge(project.status);
+                } else if (newStatus === 'closed') {
+                    App.showModal({
+                        title: 'Close Project',
+                        content: `
+                            <div class="space-y-4">
+                                <p class="text-sm text-navy-500">Select the outcome for this project.</p>
+                                <select id="close-outcome-input" class="w-full px-4 py-2 bg-white border border-navy-200 rounded-lg focus:outline-none focus:border-neon-500 text-navy-700">
+                                    <option value="Approved">Approved</option>
+                                    <option value="Rejected">Rejected</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                    <option value="Disbursed">Disbursed</option>
+                                </select>
+                            </div>
+                        `,
+                        confirmText: 'Close Project',
+                        onConfirm: () => {
+                            const outcome = document.getElementById('close-outcome-input').value;
+                            project.stage = STAGES.CLOSED;
+                            project.status = (outcome === 'Disbursed') ? STATUS.DISBURSED : STATUS.CLOSED;
+                            project.closedOutcome = outcome;
+                            project.updatedAt = new Date().toISOString();
+                            if (!project.timeline) project.timeline = {};
+                            project.timeline.closedAt = Date.now();
+                            App.showToast(`Project closed as ${outcome}`);
+                            window.switchTab('Overview');
+                            document.getElementById('header-status-badge').innerHTML = utils.getStatusBadge(project.status);
+                        }
+                    });
+                }
+            };
+
             const renderDocs = () => {
+                const borrowerType = project.borrowerType || 'salaried';
+                const slots = DOCUMENT_CONFIG.filter(slot => borrowerType === 'self_employed' || !slot.selfEmployedOnly);
+                
+                const sections = {
+                    borrower: { title: 'Section A — Borrower', items: [] },
+                    company: { title: 'Section B — Company', items: [] },
+                    asset: { title: 'Section C — Asset', items: [] },
+                    bank: { title: 'Section D — Banking', items: [] },
+                    lease: { title: 'Section E — Lease', items: [] }
+                };
+
+                slots.forEach(slot => {
+                    sections[slot.section].items.push(slot);
+                });
+
                 return `
                     <div class="bg-white border border-navy-100 rounded-xl p-8 text-center">
                         <div class="w-16 h-16 bg-navy-50 rounded-full flex items-center justify-center mx-auto mb-4 text-navy-300">
@@ -1134,21 +1321,29 @@
                         </a>
                     </div>
                     <div class="mt-8">
-                        <h4 class="text-sm font-bold text-navy-700 mb-4">Quick Summary</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            ${project.documents.groups ? project.documents.groups.map(g => `
+                        <h4 class="text-sm font-bold text-navy-700 mb-4">Checklist Summary</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                            ${Object.values(sections).filter(s => s.items.length > 0).map(s => `
                                 <div class="p-4 bg-white border border-navy-100 rounded-xl">
-                                    <p class="text-xs text-navy-400 uppercase tracking-wider font-bold mb-2">${g.title}</p>
-                                    <div class="space-y-2">
-                                        ${g.items.map(i => `
-                                            <div class="flex items-center justify-between text-sm">
-                                                <span class="text-navy-600 truncate mr-2" title="${i.name}">${i.name}</span>
-                                                ${i.status === 'verified' ? '<span class="text-neon-600">✓</span>' : '<span class="text-amber-500">●</span>'}
-                                            </div>
-                                        `).join('')}
+                                    <p class="text-[10px] text-navy-400 uppercase tracking-wider font-bold mb-2">${s.title}</p>
+                                    <div class="space-y-1">
+                                        ${s.items.map(item => {
+                    const d = project.documents.items?.[item.code];
+                    let color = 'text-navy-300';
+                    if (d?.status === 'verified') color = 'text-neon-600';
+                    else if (d?.status === 'uploaded') color = 'text-blue-500';
+                    else if (d?.status === 'rejected') color = 'text-red-500';
+                    
+                    return `
+                                                <div class="flex items-center justify-between text-[11px]">
+                                                    <span class="text-navy-600 truncate mr-1">${item.code}</span>
+                                                    <span class="${color}">●</span>
+                                                </div>
+                                            `;
+                }).join('')}
                                     </div>
                                 </div>
-                            `).join('') : '<p class="text-sm text-navy-500">No document data available.</p>'}
+                            `).join('')}
                         </div>
                     </div>
                 `;
@@ -1211,21 +1406,37 @@
             };
 
             const renderTimeline = () => {
+                const projectTimeline = project.timeline || {};
+                const milestoneData = [
+                    { label: 'T1 — Speed to Start', from: project.createdAt, to: projectTimeline.wipStartedAt },
+                    { label: 'T2 — Doc Collection', from: projectTimeline.wipStartedAt, to: projectTimeline.docsCompletedAt },
+                    { label: 'T3 — Prep & Submit', from: projectTimeline.docsCompletedAt, to: projectTimeline.submittedAt },
+                    { label: 'T4 — Bank Processing', from: projectTimeline.submittedAt, to: projectTimeline.folAt },
+                    { label: 'T5 — FOL to Disbursement', from: projectTimeline.folAt, to: projectTimeline.disbursedAt }
+                ];
+
+                const calculateDuration = (start, end) => {
+                    if (!start || !end) return 'Pending';
+                    const diff = new Date(end) - new Date(start);
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    return `${days}d`;
+                };
+
                 return `
                     <div class="bg-white border border-navy-100 rounded-xl p-6 max-w-2xl mx-auto">
-                        <h3 class="text-sm font-semibold text-navy-800 mb-6">Application Tracking</h3>
+                        <h3 class="text-sm font-semibold text-navy-800 mb-6">Application Timeline (T1-T5)</h3>
                         <div class="space-y-0 relative pl-4">
-                            ${trackingEvents.map((event, index) => {
-                    const isLast = index === trackingEvents.length - 1;
+                            ${milestoneData.map((m, index) => {
+                    const isLast = index === milestoneData.length - 1;
+                    const duration = calculateDuration(m.from, m.to);
+                    const isCompleted = duration !== 'Pending';
+                    
                     let icon = '';
                     let textClass = '';
 
-                    if (event.status === 'completed') {
+                    if (isCompleted) {
                         icon = `<div class="w-8 h-8 rounded-full bg-neon-100 text-neon-600 flex items-center justify-center border-4 border-white shadow-sm z-10"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>`;
                         textClass = 'text-navy-800 font-medium';
-                    } else if (event.status === 'current') {
-                        icon = `<div class="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center border-4 border-white shadow-sm z-10 ring-2 ring-amber-100"><div class="w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse"></div></div>`;
-                        textClass = 'text-navy-800 font-bold';
                     } else {
                         icon = `<div class="w-8 h-8 rounded-full bg-navy-50 text-navy-300 flex items-center justify-center border-4 border-white z-10"><div class="w-2 h-2 bg-navy-200 rounded-full"></div></div>`;
                         textClass = 'text-navy-400';
@@ -1237,9 +1448,11 @@
                                             ${icon}
                                         </div>
                                         <div class="pl-8 pt-1">
-                                            <p class="text-sm ${textClass}">${event.stage}</p>
-                                            ${event.status === 'completed' ? `<p class="text-xs text-navy-400 mt-1">Completed on Jan 24, 2026</p>` : ''}
-                                            ${event.status === 'current' ? `<p class="text-xs text-amber-600 mt-1">In Progress (T${index + 1})</p>` : ''}
+                                            <div class="flex justify-between items-center">
+                                                <p class="text-sm ${textClass}">${m.label}</p>
+                                                <span class="text-xs font-mono ${isCompleted ? 'text-neon-600 font-bold' : 'text-navy-300'}">${duration}</span>
+                                            </div>
+                                            ${isCompleted ? `<p class="text-[10px] text-navy-400 mt-1">Completed on ${new Date(m.to).toLocaleDateString()}</p>` : ''}
                                         </div>
                                     </div>
                                 `;
@@ -1287,28 +1500,45 @@
             // Update Header
             document.getElementById('doc-header-title').textContent = `${project.clientName.split('&')[0]}'s documents`;
             document.getElementById('doc-view-ref').textContent = `Ref: ${project.id.split('-').pop()}`;
-            document.getElementById('doc-view-ref').nextElementSibling.textContent = project.status; // simplified status
+            document.getElementById('doc-view-ref').nextElementSibling.textContent = project.status;
             document.getElementById('back-link').href = `project-detail.html?id=${projectId}`;
 
             const container = document.getElementById('document-review-container');
 
             // State
-            let selectedKind = 'doc-1'; // Default to first doc if exists
+            let selectedKind = 'A1'; // Default to first PRD slot
 
             // Helper to render
             const renderLayout = () => {
-                const groups = project.documents.groups || [];
-                let selectedDoc = null;
+                const borrowerType = project.borrowerType || 'salaried';
+                const slots = DOCUMENT_CONFIG.filter(slot => borrowerType === 'self_employed' || !slot.selfEmployedOnly);
+                
+                // Initialize documents object if not present
+                if (!project.docs) project.documents.items = {};
+                
+                let selectedSlot = slots.find(s => s.code === selectedKind) || slots[0];
+                const docData = project.documents.items[selectedSlot.code] || { status: 'missing', files: [] };
 
-                // Find selected doc logic
-                groups.forEach(g => {
-                    const found = g.items.find(i => i.id === selectedKind);
-                    if (found) selectedDoc = found;
+                // Group slots by section
+                const sections = {
+                    borrower: { title: 'Section A — Borrower Documents', items: [] },
+                    company: { title: 'Section B — Company Documents', items: [] },
+                    asset: { title: 'Section C — Asset Documents', items: [] },
+                    bank: { title: 'Section D — Banking Documents', items: [] },
+                    lease: { title: 'Section E — Lease Documents', items: [] }
+                };
+
+                slots.forEach(slot => {
+                    sections[slot.section].items.push(slot);
                 });
-                if (!selectedDoc && groups.length > 0 && groups[0].items.length > 0) {
-                    selectedDoc = groups[0].items[0];
-                    selectedKind = selectedDoc.id;
-                }
+
+                // Calculate progress
+                const totalRequired = slots.filter(s => s.required).length;
+                const completedCount = slots.filter(s => {
+                    const d = project.documents.items[s.code];
+                    return d && (d.status === 'verified' || d.status === 'uploaded');
+                }).length;
+                const percentage = Math.round((completedCount / slots.length) * 100);
 
                 // Render Left Pane
                 const leftHtml = `
@@ -1316,49 +1546,45 @@
                         <!-- Progress -->
                         <div class="p-6 border-b border-navy-100">
                             <div class="flex justify-between items-end mb-2">
-                                <span class="text-2xl font-bold text-navy-800">${project.documents.stats.percentage}% <span class="text-sm font-normal text-navy-500">Complete</span></span>
-                                <span class="text-xs text-navy-500">${project.documents.stats.outstanding} Outstanding | ${project.documents.stats.completed} Verified</span>
+                                <span class="text-2xl font-bold text-navy-800">${percentage}% <span class="text-sm font-normal text-navy-500">Complete</span></span>
+                                <span class="text-xs text-navy-500">${slots.length - completedCount} Outstanding | ${completedCount} Done</span>
                             </div>
                             <div class="w-full h-2 bg-navy-100 rounded-full overflow-hidden">
-                                <div class="h-full bg-navy-800 rounded-full" style="width: ${project.documents.stats.percentage}%"></div>
-                            </div>
-                            
-                            <div class="flex gap-4 mt-6">
-                                <button class="text-sm font-medium text-navy-800 border-b-2 border-navy-800 pb-2 -mb-px">Document Checklist</button>
-                                <button class="text-sm font-medium text-navy-400 pb-2 hover:text-navy-600 transition-colors">Unlinked documents</button>
+                                <div class="h-full bg-navy-800 rounded-full" style="width: ${percentage}%"></div>
                             </div>
                         </div>
 
                         <!-- Scrollable List -->
                         <div class="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
-                            ${groups.map(group => `
+                            ${Object.values(sections).filter(s => s.items.length > 0).map(section => `
                                 <div>
-                                    <h4 class="text-sm font-semibold text-navy-700 mb-3 ml-1">${group.title}</h4>
+                                    <h4 class="text-xs font-bold text-navy-400 uppercase tracking-wider mb-3 ml-1">${section.title}</h4>
                                     <div class="space-y-2">
-                                        ${group.items.map(item => {
-                    const isSelected = item.id === selectedKind;
+                                        ${section.items.map(item => {
+                    const isSelected = item.code === selectedSlot.code;
+                    const d = project.documents.items[item.code] || { status: 'missing' };
                     let statusBadge = '';
-                    if (item.status === 'verified') statusBadge = '<span class="text-[10px] text-neon-600 font-medium bg-neon-50 px-2 py-0.5 rounded">Verified</span>';
-                    else if (item.status === 'pending') statusBadge = '<span class="text-[10px] text-amber-600 font-medium bg-amber-50 px-2 py-0.5 rounded">Pending</span>';
-                    else statusBadge = '<span class="text-[10px] text-red-600 font-medium bg-red-50 px-2 py-0.5 rounded">Missing</span>';
+                    if (d.status === 'verified') statusBadge = '<span class="text-[10px] text-neon-600 font-medium bg-neon-50 px-2 py-0.5 rounded">Verified</span>';
+                    else if (d.status === 'uploaded') statusBadge = '<span class="text-[10px] text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded">Uploaded</span>';
+                    else if (d.status === 'rejected') statusBadge = '<span class="text-[10px] text-red-600 font-medium bg-red-50 px-2 py-0.5 rounded">Rejected</span>';
+                    else statusBadge = '<span class="text-[10px] text-navy-400 font-medium bg-navy-50 px-2 py-0.5 rounded">Missing</span>';
 
                     return `
-                                                <div onclick="window.updateSelection('${item.id}')" 
+                                                <div onclick="window.updateSelection('${item.code}')" 
                                                      class="cursor-pointer p-3 rounded-lg border transition-all ${isSelected ? 'bg-navy-50 border-navy-300 ring-1 ring-navy-200 shadow-sm' : 'bg-white border-transparent hover:bg-navy-50 hover:border-navy-200'}">
                                                     <div class="flex justify-between items-start">
                                                         <div class="flex items-start gap-3">
-                                                            <div class="w-8 h-8 rounded bg-white border border-navy-200 flex items-center justify-center text-xs text-red-500 font-medium shadow-sm">PDF</div>
+                                                            <div class="w-8 h-8 rounded bg-white border border-navy-200 flex items-center justify-center text-[10px] text-navy-500 font-bold shadow-sm">${item.code}</div>
                                                             <div>
-                                                                <p class="text-sm font-medium text-navy-700 line-clamp-1 break-all">${item.name}</p>
-                                                                <p class="text-[10px] text-navy-400 mt-0.5">Uploaded ${item.date || '-'}</p>
+                                                                <p class="text-sm font-medium text-navy-700 line-clamp-1 break-all">${item.label}</p>
+                                                                <p class="text-[10px] text-navy-400 mt-0.5">${item.required ? 'Required' : 'If applicable'}</p>
                                                             </div>
                                                         </div>
-                                                        ${item.status === 'verified' ? '<svg class="w-4 h-4 text-neon-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' : ''}
+                                                        ${d.status === 'verified' ? '<svg class="w-4 h-4 text-neon-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' : ''}
                                                     </div>
                                                     <div class="mt-3 flex justify-between items-center">
                                                         ${statusBadge}
-                                                        ${item.status === 'pending' ? `<button class="text-xs bg-navy-800 text-white px-2 py-1 rounded hover:bg-navy-700 transition-colors">Verify</button>` : ''}
-                                                        ${item.status === 'missing' ? `<button class="text-xs text-navy-500 hover:text-navy-700 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Request</button>` : ''}
+                                                        ${d.status === 'missing' || d.status === 'rejected' ? `<button onclick="event.stopPropagation(); window.simulateUpload('${item.code}')" class="text-xs bg-navy-800 text-white px-2 py-1 rounded hover:bg-navy-700 transition-colors">Upload</button>` : ''}
                                                     </div>
                                                 </div>
                                             `;
@@ -1371,79 +1597,118 @@
                 `;
 
                 // Render Right Pane
-                const rightHtml = selectedDoc ? `
+                const rightHtml = `
                     <div class="flex-1 bg-white border border-navy-200 rounded-xl flex flex-col overflow-hidden">
                         <!-- Toolbar -->
                         <div class="p-4 border-b border-navy-100 flex justify-between items-center bg-white">
                             <div>
-                                <h3 class="text-sm font-bold text-navy-800">${selectedDoc.name}</h3>
-                                <p class="text-xs text-navy-500">Status: <span class="font-medium ${selectedDoc.status === 'verified' ? 'text-neon-600' : 'text-amber-600'} capitalize">${selectedDoc.status}</span> | Uploaded: ${selectedDoc.date}</p>
+                                <h3 class="text-sm font-bold text-navy-800">${selectedSlot.label} (${selectedSlot.code})</h3>
+                                <p class="text-xs text-navy-500">Status: <span class="font-medium capitalize">${docData.status}</span></p>
                             </div>
                             <div class="flex gap-2">
-                                ${selectedDoc.status === 'pending' ? `
-                                    <button class="px-3 py-1.5 bg-red-50 text-red-600 text-xs font-medium rounded-lg hover:bg-red-100">Reject</button>
-                                    <button class="px-3 py-1.5 bg-neon-600 text-white text-xs font-medium rounded-lg hover:bg-neon-700 shadow-sm border border-neon-700">Verify Document</button>
+                                ${docData.status === 'uploaded' ? `
+                                    <button onclick="window.updateDocStatus('${selectedSlot.code}', 'rejected')" class="px-3 py-1.5 bg-red-50 text-red-600 text-xs font-medium rounded-lg hover:bg-red-100">Reject</button>
+                                    <button onclick="window.updateDocStatus('${selectedSlot.code}', 'verified')" class="px-3 py-1.5 bg-neon-600 text-white text-xs font-medium rounded-lg hover:bg-neon-700 shadow-sm">Verify Document</button>
                                 ` : ''}
-                                <button class="p-1.5 text-navy-400 hover:text-navy-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                             </div>
                         </div>
 
-                        <!-- Viewer -->
-                        <div class="flex-1 bg-navy-100 relative flex items-center justify-center p-8 overflow-hidden group">
-                            <!-- Placeholder for PDF Viewer -->
-                            <div class="bg-white shadow-lg w-full max-w-2xl h-full border border-navy-200 flex flex-col">
-                                <div class="p-8 flex-1">
-                                    <div class="w-20 h-20 bg-navy-50 rounded-lg mx-auto mb-4 flex items-center justify-center text-navy-300">
-                                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <!-- Viewer Placeholder -->
+                        <div class="flex-1 bg-navy-100 relative flex items-center justify-center p-8 overflow-hidden">
+                            ${docData.status === 'missing' ? `
+                                <div class="text-center">
+                                    <div class="w-16 h-16 bg-navy-200/50 rounded-full flex items-center justify-center mx-auto mb-4 text-navy-400">
+                                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                                     </div>
-                                    <p class="text-center text-navy-400 text-sm font-medium">Document Preview</p>
-                                    <p class="text-center text-navy-300 text-xs mt-1 font-mono">${selectedDoc.name}</p>
-                                    
-                                    <!-- Fake Text Lines -->
-                                    <div class="space-y-3 mt-12 px-12 opacity-50">
-                                        <div class="h-4 bg-navy-100 rounded w-3/4"></div>
-                                        <div class="h-4 bg-navy-100 rounded w-full"></div>
-                                        <div class="h-4 bg-navy-100 rounded w-5/6"></div>
-                                        <div class="h-4 bg-navy-100 rounded w-1/2"></div>
+                                    <p class="text-sm font-medium text-navy-500">No document uploaded yet</p>
+                                    <button onclick="window.simulateUpload('${selectedSlot.code}')" class="mt-4 text-xs bg-white border border-navy-200 px-4 py-2 rounded-lg text-navy-600 font-medium hover:bg-navy-50 shadow-sm transition-all">Click to simulate upload</button>
+                                </div>
+                            ` : `
+                                <div class="bg-white shadow-lg w-full max-w-2xl h-full border border-navy-200 flex flex-col p-8">
+                                    <div class="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-navy-100 rounded-xl">
+                                        <svg class="w-12 h-12 text-navy-200 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                        <p class="text-xs text-navy-400 font-mono">${selectedSlot.code}_${project.id}_v1.pdf</p>
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <!-- Floating Controls -->
-                            <div class="absolute bottom-6 left-1/2 -trannavy-x-1/2 bg-white/90 backdrop-blur border border-navy-200 shadow-lg rounded-full px-4 py-2 flex gap-4 text-navy-600">
-                                <button class="hover:text-neon-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path></svg> Zoom In</button>
-                                <div class="w-px bg-navy-200"></div>
-                                <button class="hover:text-neon-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"></path></svg> Zoom Out</button>
-                                <div class="w-px bg-navy-200"></div>
-                                <button class="hover:text-neon-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Rotate</button>
-                            </div>
+                            `}
                         </div>
 
-                        <!-- Comments -->
-                        <div class="h-48 border-t border-navy-200 bg-white p-4 overflow-y-auto">
-                            <h4 class="text-xs font-bold text-navy-500 uppercase tracking-wider mb-3">Comments</h4>
-                            <div class="flex gap-3 mb-4">
-                                <div class="w-6 h-6 rounded-full bg-navy-200 flex items-center justify-center text-[10px] text-navy-500 font-medium">JS</div>
-                                <div>
-                                    <p class="text-sm text-navy-700"><span class="font-bold">Jimmy Smith</span> <span class="text-navy-400 text-xs font-normal ml-1">Today 09:30</span></p>
-                                    <p class="text-sm text-navy-600 mt-0.5">Please provide a clearer copy of the document.</p>
-                                </div>
+                        <!-- Rejection Reason if any -->
+                        ${docData.rejectionReason ? `
+                            <div class="px-6 py-3 bg-red-50 border-t border-red-100">
+                                <p class="text-xs text-red-600 font-medium">Rejection Reason: ${docData.rejectionReason}</p>
                             </div>
-                            <!-- Input -->
-                            <div class="relative">
-                                <input type="text" placeholder="Add comments here" class="w-full bg-navy-50 border border-navy-200 rounded-lg pl-4 pr-12 py-2 text-sm focus:outline-none focus:border-navy-300">
-                                <button class="absolute right-2 top-1.5 text-xs bg-white border border-navy-200 px-2 py-0.5 rounded text-navy-600 font-medium shadow-sm hover:text-navy-800">Add</button>
-                            </div>
-                        </div>
+                        ` : ''}
                     </div>
-                ` : `<div class="flex-1 items-center justify-center flex text-navy-400">Select a document</div>`;
+                `;
 
                 container.innerHTML = leftHtml + rightHtml;
             };
 
-            // Expose update function globally for inline onclick
-            window.updateSelection = (id) => {
-                selectedKind = id;
+            // Event Handlers
+            window.updateSelection = (code) => {
+                selectedKind = code;
+                renderLayout();
+            };
+
+            window.updateDocStatus = (code, status) => {
+                if (!project.documents.items) project.documents.items = {};
+                if (!project.documents.items[code]) project.documents.items[code] = { files: [] };
+                
+                if (status === 'rejected') {
+                    App.showModal({
+                        title: 'Reject Document',
+                        content: `
+                            <div class="space-y-4">
+                                <p class="text-sm text-navy-500">Please provide a reason for rejecting document ${code}.</p>
+                                <textarea id="rejection-reason-input" class="w-full h-24 px-4 py-2 bg-white border border-navy-200 rounded-lg focus:outline-none focus:border-neon-500 text-navy-700" placeholder="e.g. Image blurry, expired ID..."></textarea>
+                            </div>
+                        `,
+                        confirmText: 'Reject Document',
+                        onConfirm: () => {
+                            const reason = document.getElementById('rejection-reason-input').value;
+                            if (!reason) {
+                                this.showToast('Rejection reason is required', 'error');
+                                return;
+                            }
+                            project.documents.items[code].rejectionReason = reason;
+                            project.documents.items[code].status = 'rejected';
+                            this.showToast(`Document ${code} rejected`);
+                            renderLayout();
+                        }
+                    });
+                    return;
+                } else {
+                    delete project.documents.items[code].rejectionReason;
+                }
+
+                project.documents.items[code].status = status;
+                
+                // Auto-stamping docsCompletedAt (PRD Section 5.2.4)
+                if (status === 'verified') {
+                    const borrowerType = project.borrowerType || 'salaried';
+                    const slots = DOCUMENT_CONFIG.filter(slot => borrowerType === 'self_employed' || !slot.selfEmployedOnly);
+                    const verifiedCount = slots.filter(s => project.documents.items[s.code]?.status === 'verified').length;
+                    
+                    if (verifiedCount === slots.length) {
+                        if (!project.timeline) project.timeline = {};
+                        project.timeline.docsCompletedAt = Date.now();
+                        this.showToast('All documents verified! Milestone updated.');
+                    }
+                }
+
+                this.showToast(`Document ${code} marked as ${status}`);
+                renderLayout();
+            };
+
+            window.simulateUpload = (code) => {
+                if (!project.documents.items) project.documents.items = {};
+                project.documents.items[code] = {
+                    status: 'uploaded',
+                    date: new Date().toLocaleDateString(),
+                    files: ['simulated_file.pdf']
+                };
+                this.showToast(`Simulated upload for ${code}`);
                 renderLayout();
             };
 
@@ -1457,10 +1722,24 @@
             let draggedCard = null;
 
             cards.forEach(card => {
+                const projectId = card.dataset.id;
+                const project = projects.find(p => p.id === projectId);
+
+                // Initial lock state visual
+                if (project && (project.status === STATUS.ON_HOLD || (project.status === STATUS.DISBURSED && project.stage !== STAGES.DISBURSED))) {
+                    card.classList.add('opacity-60', 'cursor-not-allowed');
+                    card.setAttribute('draggable', 'false');
+                }
+
                 card.addEventListener('dragstart', (e) => {
+                    if (project.status === STATUS.ON_HOLD) {
+                        e.preventDefault();
+                        this.showToast('On-Hold projects cannot be moved', 'error');
+                        return;
+                    }
+                    
                     draggedCard = card;
                     e.dataTransfer.effectAllowed = 'move';
-                    // Make it semi-transparent
                     setTimeout(() => card.classList.add('opacity-50', 'rotate-3'), 0);
                 });
 
@@ -1472,7 +1751,7 @@
 
             dropZones.forEach(zone => {
                 zone.addEventListener('dragover', (e) => {
-                    e.preventDefault(); // Necessary to allow dropping
+                    e.preventDefault();
                     e.dataTransfer.dropEffect = 'move';
                     zone.classList.add('bg-navy-100/50');
                 });
@@ -1486,27 +1765,106 @@
                     zone.classList.remove('bg-navy-100/50');
 
                     if (draggedCard) {
-                        // Move card to new zone
-                        zone.appendChild(draggedCard);
-
-                        // Update Data Model
                         const projectId = draggedCard.dataset.id;
-                        const newStage = zone.dataset.stage;
-
-                        // Find project and update
                         const project = projects.find(p => p.id === projectId);
-                        if (project) {
-                            project.stage = newStage;
-                            // Re-render to update counts, but wrapped in timeout to avoid dragend conflict
-                            setTimeout(() => {
-                                // Simple re-render only for prototype purposes
-                                // In production, we'd act on the state manager
-                                this.renderKanbanBoard();
-                            }, 50);
+                        const newStage = zone.dataset.stage;
+                        const oldStage = project.stage;
+
+                        // 1. Forward-only Rule
+                        const stageOrder = ['New', 'WIP', 'Docs Completed', 'Submitted', 'FOL', 'Disbursed', 'Closed'];
+                        const oldIndex = stageOrder.indexOf(oldStage);
+                        const newIndex = stageOrder.indexOf(newStage);
+
+                        if (newIndex < oldIndex) {
+                            this.showToast('Projects can only move forward', 'error');
+                            return;
                         }
+
+                        if (newIndex === oldIndex) return;
+
+                        // 2. Disbursed stage restrictions
+                        if (oldStage === STAGES.DISBURSED && newStage !== STAGES.CLOSED) {
+                            this.showToast('Disbursed projects can only move to Closed', 'error');
+                            return;
+                        }
+
+                        // 3. Interactive Prompts
+                        if (newStage === STAGES.FOL) {
+                            App.showModal({
+                                title: 'FOL Conditions',
+                                content: `
+                                    <div class="space-y-4">
+                                        <p class="text-sm text-navy-500">Enter bank conditions or requirements for this Facility Offer Letter.</p>
+                                        <textarea id="fol-notes-input" class="w-full h-32 px-4 py-2 bg-white border border-navy-200 rounded-lg focus:outline-none focus:border-neon-500 text-navy-700" placeholder="Enter bank conditions..."></textarea>
+                                    </div>
+                                `,
+                                confirmText: 'Set Stage to FOL',
+                                onConfirm: () => {
+                                    const notes = document.getElementById('fol-notes-input').value;
+                                    project.folNotes = notes;
+                                    this.finalizeStageChange(project, newStage, draggedCard, zone);
+                                }
+                            });
+                            return;
+                        }
+
+                        if (newStage === STAGES.CLOSED) {
+                            App.showModal({
+                                title: 'Select Project Outcome',
+                                content: `
+                                    <div class="space-y-4">
+                                        <p class="text-sm text-navy-500">How was this project closed?</p>
+                                        <select id="closed-outcome-input" class="w-full px-4 py-2 bg-white border border-navy-200 rounded-lg focus:outline-none focus:border-neon-500 text-navy-700">
+                                            <option value="Disbursed">Disbursed (Default)</option>
+                                            <option value="Approved">Approved but not disbursed</option>
+                                            <option value="Rejected">Rejected by Bank</option>
+                                            <option value="Cancelled">Cancelled by Client</option>
+                                        </select>
+                                    </div>
+                                `,
+                                confirmText: 'Close Project',
+                                onConfirm: () => {
+                                    const outcome = document.getElementById('closed-outcome-input').value;
+                                    project.closedOutcome = outcome;
+                                    this.finalizeStageChange(project, newStage, draggedCard, zone);
+                                }
+                            });
+                            return;
+                        }
+
+                        this.finalizeStageChange(project, newStage, draggedCard, zone);
                     }
                 });
             });
+        },
+
+        finalizeStageChange: function (project, newStage, card, zone) {
+            // Update Data
+            project.stage = newStage;
+            project.updatedAt = new Date().toISOString();
+
+            // Auto-stamping milestones (PRD Section 5.4.1)
+            if (!project.timeline) project.timeline = {};
+            if (newStage === STAGES.WIP) project.timeline.wipStartedAt = Date.now();
+            if (newStage === STAGES.DOCS_COMPLETED) project.timeline.docsCompletedAt = Date.now();
+            if (newStage === STAGES.SUBMITTED) project.timeline.submittedAt = Date.now();
+            if (newStage === STAGES.FOL) project.timeline.folAt = Date.now();
+            if (newStage === STAGES.DISBURSED) {
+                project.timeline.disbursedAt = Date.now();
+                project.status = STATUS.DISBURSED;
+            }
+            if (newStage === STAGES.CLOSED) {
+                project.timeline.closedAt = Date.now();
+                project.status = STATUS.DISBURSED; // Disbursed stage sets status to disbursed, closed can too or remain
+            }
+
+            // Move card visually
+            if (card && zone) zone.appendChild(card);
+            
+            setTimeout(() => {
+                this.renderKanbanBoard();
+                this.showToast(`Moved ${project.clientName} to ${newStage}`);
+            }, 50);
         },
 
         renderAgents: function () {
@@ -1549,10 +1907,25 @@
             const container = document.getElementById('settings-container');
             if (!container) return;
 
-            // Simple static form
-            container.innerHTML = `
-                <div class="max-w-2xl mx-auto space-y-8">
-                    <!-- Profile Section -->
+            let activeTab = 'Profile';
+
+            const renderTabs = () => {
+                const tabs = ['Profile', 'Banks', 'Referrals', 'Notifications'];
+                return `
+                    <div class="flex border-b border-navy-100 mb-8 overflow-x-auto">
+                        ${tabs.map(tab => `
+                            <button onclick="window.switchSettingsTab('${tab}')" 
+                                class="px-6 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${activeTab === tab ? 'border-neon-500 text-navy-600' : 'border-transparent text-navy-300 hover:text-navy-500'}">
+                                ${tab}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div id="settings-tab-content"></div>
+                `;
+            };
+
+            const renderProfile = () => `
+                <div class="max-w-2xl space-y-8">
                     <div class="bg-white border border-navy-200 rounded-xl p-8">
                         <h2 class="text-lg font-bold text-navy-800 mb-6">Profile Settings</h2>
                         <div class="flex items-start gap-6">
@@ -1574,35 +1947,112 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- App Preferences -->
-                    <div class="bg-white border border-navy-200 rounded-xl p-8">
-                        <h2 class="text-lg font-bold text-navy-800 mb-6">Application Preferences</h2>
-                        <div class="space-y-4">
-                            <label class="flex items-center justify-between p-4 border border-navy-100 rounded-lg cursor-pointer hover:bg-navy-50">
-                                <div>
-                                    <span class="block text-sm font-medium text-navy-800">Email Notifications</span>
-                                    <span class="block text-xs text-navy-500">Receive daily summaries</span>
-                                </div>
-                                <input type="checkbox" checked class="w-5 h-5 text-neon-600 rounded">
-                            </label>
-                            <label class="flex items-center justify-between p-4 border border-navy-100 rounded-lg cursor-pointer hover:bg-navy-50">
-                                <div>
-                                    <span class="block text-sm font-medium text-navy-800">Dark Mode</span>
-                                    <span class="block text-xs text-navy-500">Enable dark theme (Coming Soon)</span>
-                                </div>
-                                <input type="checkbox" disabled class="w-5 h-5 text-navy-300 rounded">
-                            </label>
+                        <div class="flex justify-end mt-6">
+                            <button onclick="App.showToast('Profile updated')" class="px-6 py-2 bg-neon-500 text-white rounded-lg font-medium hover:bg-neon-600 shadow-sm transition-all">Save Changes</button>
                         </div>
-                    </div>
-                    
-                    <div class="flex justify-end gap-3">
-                        <button class="px-6 py-2 bg-white border border-navy-200 rounded-lg text-navy-600 font-medium hover:bg-navy-50">Cancel</button>
-                        <button onclick="App.showToast('Settings saved successfully')" class="px-6 py-2 bg-neon-500 text-white rounded-lg font-medium hover:bg-neon-600 shadow-sm">Save Changes</button>
                     </div>
                 </div>
             `;
+
+            const renderBanks = () => `
+                <div class="bg-white border border-navy-200 rounded-xl overflow-hidden">
+                    <div class="p-6 border-b border-navy-100 flex justify-between items-center">
+                        <h2 class="text-lg font-bold text-navy-800">Bank Master Table</h2>
+                        <button onclick="App.showToast('Add Bank modal (Prod only)')" class="bg-navy-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-navy-900 transition-all">+ Add Bank</button>
+                    </div>
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-navy-50 text-navy-500 uppercase text-[10px] font-bold tracking-wider">
+                            <tr>
+                                <th class="p-4">Bank Name</th>
+                                <th class="p-4">Default Comm. %</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-navy-100">
+                            <tr>
+                                <td class="p-4 font-medium text-navy-700">First National Bank</td>
+                                <td class="p-4 font-mono text-navy-600">1.5%</td>
+                                <td class="p-4"><span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-bold">Active</span></td>
+                                <td class="p-4 text-right">
+                                    <button class="text-navy-400 hover:text-navy-600">Edit</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="p-4 font-medium text-navy-700">Wells Fargo</td>
+                                <td class="p-4 font-mono text-navy-600">1.2%</td>
+                                <td class="p-4"><span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-bold">Active</span></td>
+                                <td class="p-4 text-right">
+                                    <button class="text-navy-400 hover:text-navy-600">Edit</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            const renderReferrals = () => `
+                <div class="bg-white border border-navy-200 rounded-xl overflow-hidden">
+                    <div class="p-6 border-b border-navy-100 flex justify-between items-center">
+                        <h2 class="text-lg font-bold text-navy-800">Referral Partners</h2>
+                        <button onclick="App.showToast('Add Referral modal (Prod only)')" class="bg-navy-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-navy-900 transition-all">+ Add Partner</button>
+                    </div>
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-navy-50 text-navy-500 uppercase text-[10px] font-bold tracking-wider">
+                            <tr>
+                                <th class="p-4">Agency</th>
+                                <th class="p-4">Contact</th>
+                                <th class="p-4">Default Split</th>
+                                <th class="p-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-navy-100">
+                            <tr>
+                                <td class="p-4 font-medium text-navy-700">Epyc Digital</td>
+                                <td class="p-4 text-navy-500">Ejaz S.</td>
+                                <td class="p-4 font-mono text-navy-600">25%</td>
+                                <td class="p-4 text-right">
+                                    <button class="text-navy-400 hover:text-navy-600">Edit</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            const renderNotifications = () => `
+                <div class="max-w-2xl bg-white border border-navy-200 rounded-xl p-8">
+                    <h2 class="text-lg font-bold text-navy-800 mb-6">Notification Preferences</h2>
+                    <div class="space-y-4">
+                        <label class="flex items-center justify-between p-4 border border-navy-100 rounded-xl cursor-pointer hover:bg-navy-50 transition-all">
+                            <div>
+                                <span class="block text-sm font-medium text-navy-800">Email Notifications</span>
+                                <span class="block text-xs text-navy-500">Daily pipeline summaries</span>
+                            </div>
+                            <input type="checkbox" checked onchange="App.showToast('Email notifications updated')" class="w-5 h-5 text-neon-600 rounded-lg">
+                        </label>
+                        <label class="flex items-center justify-between p-4 border border-navy-100 rounded-xl cursor-pointer hover:bg-navy-50 transition-all">
+                            <div>
+                                <span class="block text-sm font-medium text-navy-800">Push Notifications</span>
+                                <span class="block text-xs text-navy-500">Instant stage change alerts</span>
+                            </div>
+                            <input type="checkbox" onchange="App.showToast('Push notifications updated')" class="w-5 h-5 text-neon-600 rounded-lg">
+                        </label>
+                    </div>
+                </div>
+            `;
+
+            window.switchSettingsTab = (tab) => {
+                activeTab = tab;
+                container.innerHTML = renderTabs();
+                const content = document.getElementById('settings-tab-content');
+                if (tab === 'Profile') content.innerHTML = renderProfile();
+                if (tab === 'Banks') content.innerHTML = renderBanks();
+                if (tab === 'Referrals') content.innerHTML = renderReferrals();
+                if (tab === 'Notifications') content.innerHTML = renderNotifications();
+            };
+
+            window.switchSettingsTab('Profile');
         }
     };
 
