@@ -172,7 +172,7 @@ export default function ProjectsListPage() {
                     {project.stage.replace("_", " ")}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-muted-foreground">Agent Name</TableCell>
+                <TableCell className="text-muted-foreground">{project.agentName || "Unassigned"}</TableCell>
                 <TableCell className="font-semibold text-foreground">{formatCurrency(project.loanAmount)}</TableCell>
                 <TableCell className="text-muted-foreground text-sm">{formatDate(project._creationTime)}</TableCell>
                 <TableCell>

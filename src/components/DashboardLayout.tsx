@@ -92,7 +92,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground transition-transform duration-300 ease-in-out transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:relative lg:translate-x-0 border-r border-border/10`}>
         {/* Logo */}
-        <div className="p-6 border-b border-white/10 flex items-center justify-between">
+        <div className="h-20 px-6 border-b border-white/10 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-[#05f240] to-[#04d638] rounded-xl flex items-center justify-center shadow-lg shadow-[#05f240]/25">
               <Home className="w-6 h-6 text-sidebar" />
@@ -159,7 +159,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top Header */}
-        <header className="bg-card border-b border-border px-4 lg:px-8 py-4 flex items-center justify-between sticky top-0 z-30">
+        <header className="bg-card border-b border-border px-4 lg:px-8 h-20 flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setIsSidebarOpen(true)}>
               <Menu className="w-6 h-6" />

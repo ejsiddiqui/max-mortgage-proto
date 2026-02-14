@@ -44,7 +44,20 @@ export const list = query({
       );
     }
 
-    return results;
+    // Resolve bank and agent names for the list
+    const enrichedResults = await Promise.all(
+      results.map(async (project) => {
+        const bank = await ctx.db.get(project.bankId);
+        const agent = await ctx.db.get(project.assignedAgentId);
+        return {
+          ...project,
+          bankName: bank?.name,
+          agentName: agent?.name,
+        };
+      })
+    );
+
+    return enrichedResults;
   },
 });
 

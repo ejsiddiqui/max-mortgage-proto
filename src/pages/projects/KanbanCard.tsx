@@ -55,7 +55,7 @@ export function KanbanCard({ project }: KanbanCardProps) {
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <User className="w-3 h-3" />
-            <span className="truncate">Agent Name</span>
+            <span className="truncate">{project.agentName || "Unassigned"}</span>
           </div>
         </div>
 

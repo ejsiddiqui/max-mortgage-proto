@@ -258,15 +258,16 @@ export default function DashboardPage() {
           <CardContent>
             <div className="space-y-4">
               <div className="text-center pb-4 border-b border-border/50">
-                <p className="text-3xl font-bold text-primary">19d</p>
+                <p className="text-3xl font-bold text-primary">22d</p>
                 <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mt-1">Avg. Cycle Time</p>
               </div>
               <div className="space-y-3">
                 {[
-                  { label: "T1 - Start", value: "2d" },
-                  { label: "T2 - Docs", value: "8d" },
-                  { label: "T3 - Sub", value: "3d" },
-                  { label: "T4 - Bank", value: "12d" },
+                  { label: "T1 - Speed to Start", value: "2d" },
+                  { label: "T2 - Docs Collection", value: "8d" },
+                  { label: "T3 - Prep & Submit", value: "3d" },
+                  { label: "T4 - Bank Processing", value: "12d" },
+                  { label: "T5 - FOL to Disbursed", value: "3d" },
                 ].map((t) => (
                   <div key={t.label} className="flex justify-between items-center text-sm">
                     <span className="text-muted-foreground truncate mr-2">{t.label}</span>
@@ -291,8 +292,9 @@ export default function DashboardPage() {
           <CardContent>
             <div className="space-y-6">
               {agents?.slice(0, 3).map((agent: any) => {
-                const agentActiveValue = projects?.filter((p: any) => p.assignedAgentId === agent._id && p.status !== "closed").reduce((sum: number, p: any) => sum + p.loanAmount, 0) || 0;
-                const agentDisbursedValue = projects?.filter((p: any) => p.assignedAgentId === agent._id && p.stage === "disbursed").reduce((sum: number, p: any) => sum + p.loanAmount, 0) || 0;
+                const agentProjects = projects?.filter((p: any) => p.assignedAgentId === agent._id) || [];
+                const agentActiveValue = agentProjects.filter((p: any) => p.status !== "closed" && p.status !== "disbursed").reduce((sum: number, p: any) => sum + p.loanAmount, 0) || 0;
+                const agentDisbursedValue = agentProjects.filter((p: any) => p.stage === "disbursed" || (p.stage === "closed" && p.closedOutcome === "disbursed")).reduce((sum: number, p: any) => sum + p.loanAmount, 0) || 0;
                 
                 return (
                   <div key={agent._id} className="flex items-center gap-4">
