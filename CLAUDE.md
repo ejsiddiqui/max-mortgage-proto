@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository. Read `/docs/agent/important-guidelines.md` before starting any tasks.
 
 ## Project Overview
 
@@ -73,6 +73,32 @@ Open `index.html` → Login page → Dashboard/Projects/etc.
    - Auto-complete milestone detection
 6. Follow recommended build order (Auth → Master tables → Projects → Kanban → Documents → Commission → Analytics)
 
+## Context Efficiency Best Practices
+
+**Strategic File Reading:**
+- Use `Grep` before `Read` for large files (especially `main.js` at ~933 lines)
+- Use `offset` and `limit` parameters when reading large files
+- Example: Search first with Grep to find line numbers, then Read specific sections
+- Delegate broad explorations to Task tool with `subagent_type=Explore`
+
+**Progressive Documentation Loading:**
+- This CLAUDE.md is the entry point (~3.4k tokens)
+- Detailed docs in `/docs/agent/` and `/docs/implementation/` are only loaded when needed
+- Don't read all documentation upfront — saves 10-20k tokens
+- Read specific topic files only when working on related features
+
+**Context-Efficient Tool Usage:**
+```bash
+# ❌ Avoid: Reading entire main.js (8-10k tokens)
+Read html/assets/js/main.js
+
+# ✅ Prefer: Search first, then read targeted sections
+Grep pattern="renderProjects" path="html/assets/js/main.js" output_mode="content" -n=true
+Read html/assets/js/main.js offset=100 limit=50
+```
+
+**See `context.md` for detailed context analysis and optimization recommendations.**
+
 ## Documentation Structure
 
 📖 **Detailed documentation is organized in `/docs`:**
@@ -115,11 +141,17 @@ Production implementation documentation:
 - Looking up definitions or file locations (read Quick Reference)
 
 **Progressive disclosure pattern:**
-- This CLAUDE.md provides the overview and entry point
-- Agent documentation in `/docs/agent/` contains deep implementation details
-- Implementation guides in `/docs/implementation/` contain production planning and patterns
-- Only read specific docs when you need that information
-- This saves context tokens and keeps guidance focused
+- This CLAUDE.md provides the overview and entry point (~3.4k tokens)
+- Agent documentation in `/docs/agent/` contains deep implementation details (only load when needed)
+- Implementation guides in `/docs/implementation/` contain production planning and patterns (only load when needed)
+- **Only read specific docs when you need that information** — saves 10-20k tokens vs loading all upfront
+- This keeps guidance focused and context window available for code and tool results
+
+**Example workflows:**
+- Working on Kanban → Read `docs/agent/kanban-rules.md` only
+- Working on Documents → Read `docs/agent/document-requirements.md` only
+- Planning implementation → Read `docs/implementation/PRODUCTION-READY-SUMMARY.md` only
+- Implementing Settings CRUD → Read `docs/implementation/PRODUCTION-NOTES.md` only
 
 ## Critical Rules (Always Follow)
 
@@ -203,6 +235,7 @@ Production implementation documentation:
 
 ### External Resources
 - **Auto Memory:** `C:\Users\ejsid\.claude\projects\...\memory\MEMORY.md` — Project learnings
+- **Context Analysis:** `docs/context.md` — Token usage analysis and context efficiency best practices
 - **Convex RBAC:** [convex-auth-with-role-based-permissions](https://github.com/get-convex/convex-auth-with-role-based-permissions)
 
 ### What's Production-Ready
