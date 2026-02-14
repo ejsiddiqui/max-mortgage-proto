@@ -29,6 +29,8 @@ export default function ProjectsListPage() {
     stage: "all",
     status: "all",
     search: "",
+    agentId: "all",
+    bankId: "all",
   });
   const [page, setPage] = useState(1);
   const pageSize = 5;
@@ -36,8 +38,25 @@ export default function ProjectsListPage() {
   const projects = useQuery(api.projects.list, {
     stage: filters.stage === "all" ? undefined : filters.stage,
     status: filters.status === "all" ? undefined : filters.status,
+    agentId: filters.agentId === "all" ? undefined : filters.agentId as any,
+    bankId: filters.bankId === "all" ? undefined : filters.bankId as any,
     search: filters.search || undefined,
   });
+
+  const agents = useQuery(api.users.listAgents);
+  const banks = useQuery(api.banks.list);
+
+  if (projects === undefined) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[1, 2, 3].map(i => <div key={i} className="h-32 bg-muted rounded-3xl" />)}
+        </div>
+        <div className="h-20 w-full bg-muted rounded-2xl" />
+        <div className="h-[500px] w-full bg-muted rounded-3xl" />
+      </div>
+    );
+  }
 
   const stats = {
     totalValue: projects?.reduce((sum: number, p: any) => sum + p.loanAmount, 0) || 0,
@@ -132,6 +151,24 @@ export default function ProjectsListPage() {
             <SelectContent className="rounded-xl">
               <SelectItem value="all">All Statuses</SelectItem>
               {STATUSES.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={filters.agentId} onValueChange={val => setFilters({...filters, agentId: val})}>
+            <SelectTrigger className="w-full md:w-40 rounded-xl bg-muted border-border">
+              <SelectValue placeholder="Agent" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl">
+              <SelectItem value="all">All Agents</SelectItem>
+              {agents?.map(a => <SelectItem key={a._id} value={a._id}>{a.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={filters.bankId} onValueChange={val => setFilters({...filters, bankId: val})}>
+            <SelectTrigger className="w-full md:w-40 rounded-xl bg-muted border-border">
+              <SelectValue placeholder="Bank" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl">
+              <SelectItem value="all">All Banks</SelectItem>
+              {banks?.map(b => <SelectItem key={b._id} value={b._id}>{b.name}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>

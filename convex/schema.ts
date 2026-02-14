@@ -69,6 +69,8 @@ export default defineSchema({
       )
     ),
     onHoldReason: v.optional(v.string()),
+    onHoldAt: v.optional(v.number()),
+    pausedDays: v.optional(v.number()),
     folNotes: v.optional(v.string()),
     createdBy: v.id("users"),
     notes: v.optional(v.string()),
@@ -119,6 +121,7 @@ export default defineSchema({
     documentCode: v.string(), // e.g. "A1"
     label: v.string(),
     fileIds: v.array(v.string()), // IDs from Convex storage
+    filenames: v.optional(v.array(v.string())), // Original sanitized filenames
     status: v.union(
       v.literal("missing"),
       v.literal("uploaded"),

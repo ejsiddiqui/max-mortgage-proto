@@ -23,36 +23,41 @@ import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
   const { user, role } = useCurrentUser();
-  const projects = useQuery(api.projects.list, {});
+  const stats = useQuery(api.projects.getDashboardStats);
   const logs = useQuery(api.auditLog.listRecent, { limit: 5 });
   const agents = useQuery(api.users.listAgents);
   const referrals = useQuery(api.referrals.list);
+  const projects = useQuery(api.projects.list, {}); // Still needed for some components or kept for fallback
 
-  // Computed Stats
-  const activeProjects = projects?.filter((p: any) => p.status !== "closed" && p.status !== "disbursed") || [];
-  const disbursedProjects = projects?.filter((p: any) => p.stage === "disbursed" || (p.stage === "closed" && p.closedOutcome === "disbursed")) || [];
-  
-  const totalActiveValue = activeProjects.reduce((sum: number, p: any) => sum + p.loanAmount, 0);
-  const totalDisbursedYTD = disbursedProjects.reduce((sum: number, p: any) => sum + p.loanAmount, 0);
+  if (!stats) {
+    return (
+      <div className="space-y-8 animate-pulse">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map(i => <div key={i} className="h-40 bg-muted rounded-3xl" />)}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-2 h-80 bg-muted rounded-3xl" />
+          <div className="h-80 bg-muted rounded-3xl" />
+          <div className="h-80 bg-muted rounded-3xl" />
+        </div>
+      </div>
+    );
+  }
 
-  const propertyStats = activeProjects.reduce((acc: Record<string, { count: number, amount: number }>, p: any) => {
-    const profile = p.propertyProfile === "Land" ? "Land" : "Building";
-    if (!acc[profile]) {
-      acc[profile] = { count: 0, amount: 0 };
-    }
-    acc[profile].count += 1;
-    acc[profile].amount += p.loanAmount;
-    return acc;
-  }, { "Land": { count: 0, amount: 0 }, "Building": { count: 0, amount: 0 } });
+  const { 
+    totalActiveValue, 
+    totalActiveCount, 
+    totalDisbursedYTD, 
+    disbursedCountYTD, 
+    propertyMix, 
+    stageBreakdown, 
+    averages, 
+    avgCycleTime, 
+    recentlyUpdated 
+  } = stats;
 
-  const totalPropertyCount = activeProjects.length || 1;
-  const landPercent = Math.round((propertyStats["Land"].count / totalPropertyCount) * 100);
+  const landPercent = Math.round((propertyMix.Land.count / (totalActiveCount || 1)) * 100);
   const buildingPercent = 100 - landPercent;
-
-  const stageCounts = STAGES.map(s => ({
-    ...s,
-    count: projects?.filter((p: any) => p.stage === s.value).length || 0
-  }));
 
   const getStageColor = (color: string) => {
     switch (color) {
@@ -81,7 +86,7 @@ export default function DashboardPage() {
               <h2 className="text-2xl font-bold mt-1">{user?.name || "User"}</h2>
             </div>
             <div className="mt-8 flex flex-col gap-3">
-              <p className="text-primary-foreground/60 text-xs">You have {activeProjects.length} active projects in your pipeline.</p>
+              <p className="text-primary-foreground/60 text-xs">You have {totalActiveCount} active projects in your pipeline.</p>
               <Button asChild variant="secondary" className="w-full bg-white/10 hover:bg-white/20 border-none text-white rounded-xl h-10">
                 <Link to="/projects">View Pipeline <ArrowUpRight className="w-4 h-4 ml-2" /></Link>
               </Button>
@@ -101,7 +106,7 @@ export default function DashboardPage() {
             <p className="text-muted-foreground text-sm font-medium">Disbursed Amount</p>
             <h3 className="text-2xl font-bold text-foreground mt-1">{formatCurrency(totalDisbursedYTD)}</h3>
             <div className="flex items-center gap-2 mt-4 text-xs">
-              <span className="font-bold text-emerald-600">{disbursedProjects.length} Cases</span>
+              <span className="font-bold text-emerald-600">{disbursedCountYTD} Cases</span>
               <span className="text-muted-foreground">completed this year</span>
             </div>
           </CardContent>
@@ -119,7 +124,7 @@ export default function DashboardPage() {
             <p className="text-muted-foreground text-sm font-medium">Total Pipeline Value</p>
             <h3 className="text-2xl font-bold text-foreground mt-1">{formatCurrency(totalActiveValue)}</h3>
             <div className="flex items-center gap-2 mt-4 text-xs">
-              <span className="font-bold text-blue-600">{activeProjects.length} Active</span>
+              <span className="font-bold text-blue-600">{totalActiveCount} Active</span>
               <span className="text-muted-foreground">currently in progress</span>
             </div>
           </CardContent>
@@ -143,10 +148,10 @@ export default function DashboardPage() {
                   <span className="text-sm font-medium">Land</span>
                 </div>
                 <div className="text-xl font-bold text-foreground">
-                  {formatCurrency(propertyStats["Land"].amount)}
+                  {formatCurrency(propertyMix.Land.amount)}
                 </div>
                 <div className="text-[11px] text-muted-foreground/60 font-medium">
-                  {landPercent}% • {propertyStats["Land"].count} cases
+                  {landPercent}% • {propertyMix.Land.count} cases
                 </div>
               </div>
 
@@ -157,10 +162,10 @@ export default function DashboardPage() {
                   <span className="text-sm font-medium">Building</span>
                 </div>
                 <div className="text-xl font-bold text-foreground">
-                  {formatCurrency(propertyStats["Building"].amount)}
+                  {formatCurrency(propertyMix.Building.amount)}
                 </div>
                 <div className="text-[11px] text-muted-foreground/60 font-medium">
-                  {buildingPercent}% • {propertyStats["Building"].count} cases
+                  {buildingPercent}% • {propertyMix.Building.count} cases
                 </div>
               </div>
             </div>
@@ -192,7 +197,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {activeProjects.slice(0, 5).map((p: any) => (
+              {recentlyUpdated.map((p: any) => (
                 <div key={p._id} className="flex items-center justify-between p-3 rounded-2xl hover:bg-muted transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-muted-foreground font-bold text-xs">
@@ -214,7 +219,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
               ))}
-              {activeProjects.length === 0 && (
+              {recentlyUpdated.length === 0 && (
                 <div className="py-12 text-center text-muted-foreground">No active projects found.</div>
               )}
             </div>
@@ -228,24 +233,27 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {stageCounts.map((s) => (
-                <div key={s.value} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full ${
-                      s.color === "blue" ? "bg-blue-500" :
-                      s.color === "indigo" ? "bg-indigo-500" :
-                      s.color === "purple" ? "bg-purple-500" :
-                      s.color === "cyan" ? "bg-cyan-500" :
-                      s.color === "orange" ? "bg-orange-500" :
-                      s.color === "emerald" ? "bg-emerald-500" : "bg-muted"
-                    }`}></div>
-                    <span className="text-sm text-muted-foreground truncate max-w-[200px]">{s.label}</span>
+              {stageBreakdown.map((s: any) => {
+                const stageInfo = STAGES.find(stage => stage.value === s.stage);
+                return (
+                  <div key={s.stage} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2 h-2 rounded-full ${
+                        stageInfo?.color === "blue" ? "bg-blue-500" :
+                        stageInfo?.color === "indigo" ? "bg-indigo-500" :
+                        stageInfo?.color === "purple" ? "bg-purple-500" :
+                        stageInfo?.color === "cyan" ? "bg-cyan-500" :
+                        stageInfo?.color === "orange" ? "bg-orange-500" :
+                        stageInfo?.color === "emerald" ? "bg-emerald-500" : "bg-muted"
+                      }`}></div>
+                      <span className="text-sm text-muted-foreground truncate max-w-[200px]">{stageInfo?.label}</span>
+                    </div>
+                    <Badge variant="secondary" className="rounded-lg bg-muted text-muted-foreground font-bold">
+                      {s.count}
+                    </Badge>
                   </div>
-                  <Badge variant="secondary" className="rounded-lg bg-muted text-muted-foreground font-bold">
-                    {s.count}
-                  </Badge>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
@@ -258,16 +266,16 @@ export default function DashboardPage() {
           <CardContent>
             <div className="space-y-4">
               <div className="text-center pb-4 border-b border-border/50">
-                <p className="text-3xl font-bold text-primary">22d</p>
+                <p className="text-3xl font-bold text-primary">{avgCycleTime}d</p>
                 <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mt-1">Avg. Cycle Time</p>
               </div>
               <div className="space-y-3">
                 {[
-                  { label: "T1 - Speed to Start", value: "2d" },
-                  { label: "T2 - Docs Collection", value: "8d" },
-                  { label: "T3 - Prep & Submit", value: "3d" },
-                  { label: "T4 - Bank Processing", value: "12d" },
-                  { label: "T5 - FOL to Disbursed", value: "3d" },
+                  { label: "T1 - Speed to Start", value: `${averages.t1}d` },
+                  { label: "T2 - Docs Collection", value: `${averages.t2}d` },
+                  { label: "T3 - Prep & Submit", value: `${averages.t3}d` },
+                  { label: "T4 - Bank Processing", value: `${averages.t4}d` },
+                  { label: "T5 - FOL to Disbursed", value: `${averages.t5}d` },
                 ].map((t) => (
                   <div key={t.label} className="flex justify-between items-center text-sm">
                     <span className="text-muted-foreground truncate mr-2">{t.label}</span>

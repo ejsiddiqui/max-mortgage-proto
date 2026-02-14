@@ -13,7 +13,8 @@ import {
   PlayCircle, 
   XCircle, 
   History,
-  ShieldAlert
+  ShieldAlert,
+  Edit
 } from "lucide-react";
 import { formatCurrency, formatDate, formatRelativeTime } from "@/lib/utils";
 import { useState } from "react";
@@ -26,18 +27,35 @@ import {
   DialogDescription
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 import { toast } from "sonner";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { BORROWER_TYPES, BUSINESS_TYPES, PROPERTY_PROFILES } from "@/lib/constants";
 
 interface OverviewTabProps {
   project: any;
 }
 
 export default function OverviewTab({ project }: OverviewTabProps) {
+  const { user, role } = useCurrentUser();
+  
   const changeStatus = useMutation(api.projects.changeStatus);
   const logs = useQuery(api.auditLog.listByProject, { projectId: project._id, limit: 5 });
   
   const [isOnHoldModalOpen, setIsOnHoldModalOpen] = useState(false);
+  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
   const [onHoldReason, setOnHoldReason] = useState("");
+  const [closedOutcome, setClosedOutcome] = useState<any>("approved");
+
+  const changeStage = useMutation(api.projects.changeStage);
 
   const handleToggleStatus = async () => {
     if (project.status === "on_hold") {
@@ -58,6 +76,21 @@ export default function OverviewTab({ project }: OverviewTabProps) {
       toast.success("Project put on hold");
       setIsOnHoldModalOpen(false);
       setOnHoldReason("");
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  // Note: Project closing logic is still here as it's a valid status control
+  const handleCloseSubmit = async () => {
+    try {
+      await changeStage({ 
+        id: project._id, 
+        newStage: "closed", 
+        metadata: { closedOutcome } 
+      });
+      toast.success("Project closed");
+      setIsCloseModalOpen(false);
     } catch (error: any) {
       toast.error(error.message);
     }
@@ -222,6 +255,7 @@ export default function OverviewTab({ project }: OverviewTabProps) {
               </Button>
               <Button 
                 variant="outline" 
+                onClick={() => setIsCloseModalOpen(true)}
                 disabled={project.stage === "closed"}
                 className="rounded-xl justify-start gap-3 h-12 border-border hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20"
               >
@@ -282,6 +316,38 @@ export default function OverviewTab({ project }: OverviewTabProps) {
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsOnHoldModalOpen(false)} className="rounded-xl">Cancel</Button>
             <Button onClick={handleOnHoldSubmit} className="rounded-xl px-8 bg-primary">Confirm</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Close Project Modal */}
+      <Dialog open={isCloseModalOpen} onOpenChange={setIsCloseModalOpen}>
+        <DialogContent className="rounded-3xl">
+          <DialogHeader>
+            <DialogTitle>Close Project</DialogTitle>
+            <DialogDescription>
+              Select the final outcome for this mortgage application.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Outcome *</Label>
+              <Select value={closedOutcome} onValueChange={setClosedOutcome}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl">
+                  <SelectItem value="disbursed">Successfully Disbursed</SelectItem>
+                  <SelectItem value="approved">Approved (but not disbursed)</SelectItem>
+                  <SelectItem value="rejected">Rejected by Bank</SelectItem>
+                  <SelectItem value="cancelled">Cancelled by Client</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCloseModalOpen(false)} className="rounded-xl">Cancel</Button>
+            <Button onClick={handleCloseSubmit} className="rounded-xl px-8 bg-primary">Close Project</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

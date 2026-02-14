@@ -96,6 +96,21 @@ export default function BanksTab() {
     }
   };
 
+  if (banks === undefined) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div className="space-y-2">
+            <div className="h-8 w-32 bg-muted animate-pulse rounded-lg"></div>
+            <div className="h-4 w-64 bg-muted animate-pulse rounded-lg"></div>
+          </div>
+          <div className="h-10 w-28 bg-muted animate-pulse rounded-lg"></div>
+        </div>
+        <div className="border border-border rounded-2xl overflow-hidden bg-card h-64 animate-pulse"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">

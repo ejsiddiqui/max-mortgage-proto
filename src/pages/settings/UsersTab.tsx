@@ -127,6 +127,21 @@ export default function UsersTab() {
     return name.split(" ").map(n => n[0]).join("").toUpperCase();
   };
 
+  if (users === undefined) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div className="space-y-2">
+            <div className="h-8 w-40 bg-muted animate-pulse rounded-lg"></div>
+            <div className="h-4 w-64 bg-muted animate-pulse rounded-lg"></div>
+          </div>
+          <div className="h-10 w-28 bg-muted animate-pulse rounded-lg"></div>
+        </div>
+        <div className="border border-border rounded-2xl overflow-hidden bg-card h-64 animate-pulse"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -201,7 +216,8 @@ export default function UsersTab() {
                             name: u.name || "", 
                             role: u.role || "agent", 
                             isActive: u.isActive !== false, 
-                            commissionRate: u.commissionRate || 0 
+                            commissionRate: u.commissionRate || 0,
+                            email: u.email || ""
                           }); 
                         }}
                         className="gap-2 rounded-lg cursor-pointer focus:bg-muted"
@@ -228,6 +244,13 @@ export default function UsersTab() {
                 </TableCell>
               </TableRow>
             ))}
+            {!users?.length && (
+              <TableRow>
+                <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+                  No users found. Add your first team member to get started.
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>
@@ -293,7 +316,7 @@ export default function UsersTab() {
 
       {/* Add User Modal */}
       <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-        <DialogContent className="rounded-3xl max-w-md bg-card border-border">
+        <DialogContent className="rounded-3xl max-w-md">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-foreground">Add New User</DialogTitle>
             <DialogDescription>Create a new internal account.</DialogDescription>
@@ -306,7 +329,7 @@ export default function UsersTab() {
                 value={formData.name} 
                 onChange={e => setFormData({...formData, name: e.target.value})}
                 placeholder="e.g. John Doe"
-                className="rounded-xl border-border bg-muted/30"
+                className="rounded-xl"
                 required
               />
             </div>
@@ -318,7 +341,7 @@ export default function UsersTab() {
                 value={formData.email} 
                 onChange={e => setFormData({...formData, email: e.target.value})}
                 placeholder="user@maxmortgage.com"
-                className="rounded-xl border-border bg-muted/30"
+                className="rounded-xl"
                 required
               />
             </div>
@@ -328,10 +351,10 @@ export default function UsersTab() {
                 value={formData.role} 
                 onValueChange={(val: any) => setFormData({...formData, role: val})}
               >
-                <SelectTrigger id="addUserRole" className="rounded-xl border-border bg-muted/30">
+                <SelectTrigger id="addUserRole" className="rounded-xl">
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
-                <SelectContent className="bg-card border-border rounded-xl">
+                <SelectContent className="rounded-xl">
                   <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="agent">Agent</SelectItem>
                   <SelectItem value="viewer">Viewer</SelectItem>
@@ -347,16 +370,16 @@ export default function UsersTab() {
                   type="number"
                   value={formData.commissionRate} 
                   onChange={e => setFormData({...formData, commissionRate: parseInt(e.target.value)})}
-                  className="rounded-xl border-border bg-muted/30"
+                  className="rounded-xl"
                 />
               </div>
             )}
 
             <DialogFooter className="pt-4 gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsAddModalOpen(false)} className="rounded-xl border-border">
+              <Button type="button" variant="outline" onClick={() => setIsAddModalOpen(false)} className="rounded-xl">
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-xl px-8 bg-primary border-none text-primary-foreground">
+              <Button type="submit" className="rounded-xl px-8 bg-primary text-primary-foreground">
                 Create User
               </Button>
             </DialogFooter>

@@ -242,8 +242,19 @@ export const changeStatus = mutation({
     }
 
     const updates: any = { status: args.newStatus };
-    if (args.newStatus === "on_hold") updates.onHoldReason = args.reason;
-    if (args.newStatus === "active") updates.onHoldReason = undefined;
+    if (args.newStatus === "on_hold") {
+      updates.onHoldReason = args.reason;
+      updates.onHoldAt = Date.now();
+    }
+    if (args.newStatus === "active") {
+      updates.onHoldReason = undefined;
+      if (project.onHoldAt) {
+        const pausedMillis = Date.now() - project.onHoldAt;
+        const pausedDays = Math.round(pausedMillis / (1000 * 60 * 60 * 24));
+        updates.pausedDays = (project.pausedDays || 0) + pausedDays;
+        updates.onHoldAt = undefined;
+      }
+    }
 
     await ctx.db.patch(args.id, updates);
 
@@ -321,5 +332,118 @@ export const update = mutation({
       details: JSON.stringify({ updatedFields: Object.keys(fields) }),
       timestamp: Date.now(),
     });
+  },
+});
+
+export const updateMilestones = mutation({
+  args: {
+    id: v.id("projects"),
+    wipStartedAt: v.optional(v.number()),
+    docsCompletedAt: v.optional(v.number()),
+    submittedAt: v.optional(v.number()),
+    folAt: v.optional(v.number()),
+    disbursedAt: v.optional(v.number()),
+    closedAt: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    await requireRole(ctx, ["admin"]);
+    const { id, ...milestones } = args;
+    const project = await ctx.db.get(id);
+    if (!project) throw new Error("Project not found");
+
+    // Chronological validation
+    const m: any = { ...project, ...milestones };
+    if (m.wipStartedAt && m.docsCompletedAt && m.wipStartedAt > m.docsCompletedAt) throw new Error("WIP must start before Docs Completed");
+    if (m.docsCompletedAt && m.submittedAt && m.docsCompletedAt > m.submittedAt) throw new Error("Docs must be completed before Submission");
+    if (m.submittedAt && m.folAt && m.submittedAt > m.folAt) throw new Error("Submission must be before FOL");
+    if (m.folAt && m.disbursedAt && m.folAt > m.disbursedAt) throw new Error("FOL must be before Disbursement");
+
+    await ctx.db.patch(id, milestones);
+
+    // Log action
+    await ctx.db.insert("auditLog", {
+      projectId: id,
+      action: "milestone_edit",
+      performedBy: (await requireUser(ctx))._id,
+      details: JSON.stringify({ updatedMilestones: Object.keys(milestones) }),
+      timestamp: Date.now(),
+    });
+  },
+});
+
+export const getDashboardStats = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await requireUser(ctx);
+    let q = ctx.db.query("projects");
+
+    if (user.role === "agent") {
+      q = q.filter((q) => 
+        q.or(
+          q.eq(q.field("assignedAgentId"), user._id),
+          q.eq(q.field("createdBy"), user._id)
+        )
+      );
+    }
+
+    const allProjects = await q.collect();
+    const currentYear = new Date().getFullYear();
+
+    const activeProjects = allProjects.filter(p => p.stage !== "closed" && p.status !== "disbursed");
+    const disbursedProjectsYTD = allProjects.filter(p => 
+      p.disbursedAt && new Date(p.disbursedAt).getFullYear() === currentYear
+    );
+
+    const totalActiveValue = activeProjects.reduce((sum, p) => sum + p.loanAmount, 0);
+    const totalDisbursedYTD = disbursedProjectsYTD.reduce((sum, p) => sum + p.loanAmount, 0);
+
+    const propertyMix = activeProjects.reduce((acc: any, p) => {
+      const profile = p.propertyProfile || "Building";
+      if (!acc[profile]) acc[profile] = { count: 0, amount: 0 };
+      acc[profile].count++;
+      acc[profile].amount += p.loanAmount;
+      return acc;
+    }, { Land: { count: 0, amount: 0 }, Building: { count: 0, amount: 0 } });
+
+    const stages = ["new", "wip", "docs_completed", "submitted", "fol", "disbursed", "closed"];
+    const stageBreakdown = stages.map(s => ({
+      stage: s,
+      count: allProjects.filter(p => p.stage === s).length
+    }));
+
+    // Calculate averages (T1-T5)
+    const closedProjects = allProjects.filter(p => p.closedAt || p.disbursedAt);
+    const calcAvg = (projects: any[], startField: string, endField: string) => {
+      const valid = projects.filter(p => p[startField] && p[endField]);
+      if (valid.length === 0) return 0;
+      const sum = valid.reduce((s, p) => s + (p[endField] - p[startField]), 0);
+      return Math.round(sum / valid.length / (1000 * 60 * 60 * 24)); // in days
+    };
+
+    const averages = {
+      t1: calcAvg(allProjects, "_creationTime", "wipStartedAt"),
+      t2: calcAvg(allProjects, "wipStartedAt", "docsCompletedAt"),
+      t3: calcAvg(allProjects, "docsCompletedAt", "submittedAt"),
+      t4: calcAvg(allProjects, "submittedAt", "folAt"),
+      t5: calcAvg(allProjects, "folAt", "disbursedAt"),
+    };
+    const avgCycleTime = averages.t1 + averages.t2 + averages.t3 + averages.t4 + averages.t5;
+
+    // Resolve recently updated
+    const recentlyUpdated = [...activeProjects]
+      .sort((a, b) => (b.disbursedAt || b._creationTime) - (a.disbursedAt || a._creationTime))
+      .slice(0, 5);
+
+    return {
+      totalActiveValue,
+      totalActiveCount: activeProjects.length,
+      totalDisbursedYTD,
+      disbursedCountYTD: disbursedProjectsYTD.length,
+      propertyMix,
+      stageBreakdown,
+      averages,
+      avgCycleTime,
+      recentlyUpdated,
+    };
   },
 });

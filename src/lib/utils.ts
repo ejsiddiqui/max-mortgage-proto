@@ -83,19 +83,13 @@ export const generateProjectCode = (lastCode?: string) => {
 };
 
 /**
-
  * Calculate duration in days between two timestamps
-
  */
-
-export const calculateDuration = (from?: number, to?: number) => {
-
-  if (!from || !to) return null;
-
+export const calculateDuration = (from?: number, to?: number, pausedDays: number = 0) => {
+  if (!from || !to) return 0;
   const diffMs = to - from;
-
-  return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-
+  const days = Math.round(diffMs / (1000 * 60 * 60 * 24));
+  return Math.max(0, days - pausedDays);
 };
 
 
@@ -138,6 +132,33 @@ export const calculateReferralShare = (commission: number, referralRate: number)
 
   return (commission * referralRate) / 100;
 
+};
+
+
+
+/**
+
+ * Sanitize filename by removing unwanted characters and replacing spaces with underscores
+
+ */
+
+
+export const sanitizeFilename = (filename: string): string => {
+  if (!filename) return 'unnamed_file';
+  
+  // Split name and extension
+  const lastDotIndex = filename.lastIndexOf('.');
+  let name = lastDotIndex !== -1 ? filename.substring(0, lastDotIndex) : filename;
+  const ext = lastDotIndex !== -1 ? filename.substring(lastDotIndex) : '';
+
+  // Sanitize name: remove non-alphanumeric except dots, dashes, underscores
+  // Replace spaces with underscores
+  name = name
+    .trim()
+    .replace(/\s+/g, '_')
+    .replace(/[^a-zA-Z0-9._-]/g, '');
+
+  return (name + ext).toLowerCase();
 };
 
 

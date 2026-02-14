@@ -36,6 +36,22 @@ export default function AgentsPage() {
     return a.name?.toLowerCase().includes(term) || a.email?.toLowerCase().includes(term);
   });
 
+  if (agents === undefined) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        <div className="flex justify-between items-center">
+          <div className="h-10 w-96 bg-muted rounded-xl"></div>
+          <div className="h-10 w-32 bg-muted rounded-xl"></div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-80 bg-muted rounded-3xl"></div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   const getAgentMetrics = (agentId: string) => {
     const agentProjects = projects?.filter((p: any) => p.assignedAgentId === agentId) || [];
     const active = agentProjects.filter((p: any) => p.status !== "closed" && p.status !== "disbursed").length;
@@ -151,11 +167,58 @@ export default function AgentsPage() {
         </div>
       ) : (
         <div className="bg-card border border-border rounded-3xl overflow-hidden shadow-sm">
-          {/* Table view could be added here, simplified for now */}
-          <div className="p-8 text-center text-muted-foreground">
-            <TrendingUp className="w-12 h-12 mx-auto mb-4 opacity-20" />
-            <p>Agent performance table view will be available in the next update.</p>
-          </div>
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-muted/50 border-b border-border">
+                <th className="p-4 pl-6 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Agent</th>
+                <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Active</th>
+                <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Closed</th>
+                <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-wider text-right">Pipeline Total</th>
+                <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Region</th>
+                <th className="p-4 pr-6 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {filteredAgents?.map((agent) => {
+                const metrics = getAgentMetrics(agent._id);
+                return (
+                  <tr key={agent._id} className="hover:bg-muted/30 transition-colors">
+                    <td className="p-4 pl-6">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="w-9 h-9 rounded-xl border border-border">
+                          <AvatarImage src={agent.image} />
+                          <AvatarFallback className="bg-primary/5 text-primary text-xs font-bold">
+                            {getInitials(agent.name || agent.email)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-bold text-foreground">{agent.name || "Unnamed Agent"}</p>
+                          <p className="text-[10px] text-muted-foreground">{agent.email}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <span className="text-sm font-bold text-foreground">{metrics.active}</span>
+                    </td>
+                    <td className="p-4">
+                      <span className="text-sm font-bold text-foreground">{metrics.closed}</span>
+                    </td>
+                    <td className="p-4 text-right">
+                      <span className="text-sm font-bold text-primary">{formatCurrency(metrics.pipelineTotal)}</span>
+                    </td>
+                    <td className="p-4">
+                      <span className="text-sm text-muted-foreground">{agent.region || "Dubai"}</span>
+                    </td>
+                    <td className="p-4 pr-6">
+                      <Badge className={agent.isActive !== false ? "bg-emerald-500/10 text-emerald-600 border-none" : "bg-muted text-muted-foreground border-none"}>
+                        {agent.isActive !== false ? "Active" : "Inactive"}
+                      </Badge>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
 

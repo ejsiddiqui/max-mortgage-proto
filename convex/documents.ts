@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { requireUser, requireRole } from "./utils";
+import { requireUser, requireRole, requireAdmin } from "./utils";
 
 export const listByProject = query({
   args: { projectId: v.id("projects") },
@@ -79,6 +79,7 @@ export const upload = mutation({
     section: v.union(v.literal("borrower"), v.literal("company"), v.literal("asset"), v.literal("bank"), v.literal("lease"), v.literal("other")),
     label: v.string(),
     storageId: v.string(),
+    fileName: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const user = await requireRole(ctx, ["admin", "agent"]);
@@ -96,10 +97,15 @@ export const upload = mutation({
       .first();
 
     let docId;
+    const fileName = args.fileName || "unnamed_file";
+
     if (existing) {
       const newFileIds = [...existing.fileIds, args.storageId];
+      const newFilenames = [...(existing.filenames || []), fileName];
+      
       await ctx.db.patch(existing._id, {
         fileIds: newFileIds,
+        filenames: newFilenames,
         status: "uploaded",
         uploadedBy: user._id,
       });
@@ -111,6 +117,7 @@ export const upload = mutation({
         section: args.section,
         label: args.label,
         fileIds: [args.storageId],
+        filenames: [fileName],
         status: "uploaded",
         uploadedBy: user._id,
       });
@@ -189,19 +196,93 @@ export const removeFile = mutation({
     const doc = await ctx.db.get(args.id);
     if (!doc) throw new Error("Document not found");
 
+    const fileIndex = doc.fileIds.indexOf(args.storageId);
+    if (fileIndex === -1) return;
+
     const newFileIds = doc.fileIds.filter(f => f !== args.storageId);
+    const newFilenames = doc.filenames ? doc.filenames.filter((_, i) => i !== fileIndex) : undefined;
     
     if (newFileIds.length === 0) {
       await ctx.db.patch(args.id, {
         fileIds: [],
+        filenames: [],
         status: "missing",
       });
     } else {
       await ctx.db.patch(args.id, {
         fileIds: newFileIds,
+        filenames: newFilenames,
       });
     }
 
     await ctx.storage.delete(args.storageId as any);
+
+    // Log action
+    await ctx.db.insert("auditLog", {
+      projectId: doc.projectId,
+      action: "document_file_remove",
+      performedBy: user._id,
+      details: JSON.stringify({ documentCode: doc.documentCode, storageId: args.storageId }),
+      timestamp: Date.now(),
+    });
+  },
+});
+
+export const getProgress = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    const project = await ctx.db.get(args.projectId);
+    if (!project) return { uploaded: 0, verified: 0, total: 0, percentage: 0 };
+
+    const docs = await ctx.db
+      .query("documents")
+      .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+      .collect();
+
+    const requiredSlots = DOCUMENT_CONFIG.filter(slot => 
+      slot.required && (project.borrowerType === "self_employed" || !slot.selfEmployedOnly)
+    );
+
+    const total = requiredSlots.length;
+    const uploaded = requiredSlots.filter(slot => {
+      const doc = docs.find(d => d.documentCode === slot.code);
+      return doc && (doc.status === "uploaded" || doc.status === "verified");
+    }).length;
+    
+    const verified = requiredSlots.filter(slot => {
+      const doc = docs.find(d => d.documentCode === slot.code);
+      return doc && doc.status === "verified";
+    }).length;
+
+    const percentage = total > 0 ? Math.round((uploaded / total) * 100) : 0;
+
+    return { uploaded, verified, total, percentage };
+  },
+});
+
+export const deleteDocument = mutation({
+  args: { id: v.id("documents") },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const doc = await ctx.db.get(args.id);
+    if (!doc) throw new Error("Document not found");
+
+    // Delete all files from storage
+    for (const storageId of doc.fileIds) {
+      await ctx.storage.delete(storageId as any);
+    }
+
+    // Delete record
+    await ctx.db.delete(args.id);
+
+    // Log action
+    await ctx.db.insert("auditLog", {
+      projectId: doc.projectId,
+      action: "document_delete",
+      performedBy: (await requireUser(ctx))._id,
+      details: JSON.stringify({ documentCode: doc.documentCode, label: doc.label }),
+      timestamp: Date.now(),
+    });
   },
 });

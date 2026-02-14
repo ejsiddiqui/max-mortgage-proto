@@ -15,10 +15,22 @@ Implement Max Mortgage production stack using Convex + React + ShadCN, adhering 
 - [x] **Dashboard UI:** 3-row layout with all 10 PRD widgets implemented.
 - [x] **Timeline:** T1-T5 milestone durations implemented on project detail.
 
-### 2. Production Planning (READY)
-- [x] **Master Task List:** `docs/implementation/task-list-production-master.md` created with dependency graph.
-- [x] **Detailed Tasks:** `docs/implementation/task-list-production-details.md` created with 20 granular tasks.
-- [x] **Schema Design:** Convex schema fully mapped from PRD Section 4.
+### 2. Production Implementation (IN PROGRESS)
+- [x] **Backend Infrastructure:** Document engine, audit logs, and project lifecycle mutations fully implemented.
+- [x] **Dashboard:** 100% dynamic dashboard with real-time stats and processing time averages.
+- [x] **Document Management:** Multi-file upload, verification, rejection, and "Others" section implemented.
+- [x] **Project Details:** Overview, Documents, Commission, and Timeline tabs fully functional with RBAC.
+- [x] **Agents Page:** Grid and Table views with dynamic performance metrics.
+- [x] **Settings Page:** Full CRUD for Banks, Referrals, and Users with confirmation modals.
+- [x] **RBAC:** Consistent enforcement of Admin, Agent, and Viewer roles across UI and Backend.
+- [x] **Master Task List:** `docs/implementation/task-list-production-master.md` tracked via `task-list-02.md`.
+
+## 🛡️ Quality & Safety Rules (MANDATORY)
+1. **Verification Before Finalizing:** After any code modification, especially in shared utilities or schemas, run:
+   - `npx tsc --noEmit` (Frontend check)
+   - `npx convex dev --once --typecheck enable` (Backend check)
+2. **Import Integrity:** Never remove existing exports from `src/lib/utils.ts` or other shared files without verifying all call sites.
+3. **RBAC Checks:** Always ensure `useCurrentUser` is used for UI gating and `requireRole/requireAdmin` for backend protection.
 
 ## 🚀 Production Implementation Plan
 

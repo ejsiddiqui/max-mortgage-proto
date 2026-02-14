@@ -86,10 +86,33 @@ export default function ProjectDetailPage() {
     }
   }, [project]);
 
-  if (!project) {
+  if (project === undefined) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Loading project details...</div>
+      <div className="space-y-6 max-w-7xl mx-auto animate-pulse">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-muted rounded-xl"></div>
+            <div className="space-y-2">
+              <div className="h-8 w-48 bg-muted rounded-lg"></div>
+              <div className="h-4 w-32 bg-muted rounded-lg"></div>
+            </div>
+          </div>
+          <div className="h-10 w-32 bg-muted rounded-xl"></div>
+        </div>
+        <div className="h-12 w-full max-w-md bg-muted rounded-2xl"></div>
+        <div className="h-[600px] w-full bg-muted rounded-3xl"></div>
+      </div>
+    );
+  }
+
+  if (project === null) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center space-y-4">
+        <AlertCircle className="w-12 h-12 text-muted-foreground opacity-20" />
+        <h3 className="text-xl font-bold text-foreground">Project not found</h3>
+        <Button asChild variant="outline" className="rounded-xl">
+          <Link to="/projects">Back to Projects</Link>
+        </Button>
       </div>
     );
   }

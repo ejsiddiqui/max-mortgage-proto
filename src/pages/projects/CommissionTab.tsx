@@ -17,6 +17,8 @@ interface CommissionTabProps {
 export default function CommissionTab({ project }: CommissionTabProps) {
   const { role } = useCurrentUser();
   const isAdmin = role === "admin";
+  const isAgent = role === "agent";
+  const isViewer = role === "viewer";
   const updateCommission = useMutation(api.projects.updateCommission);
 
   const [formData, setFormData] = useState({
@@ -42,8 +44,47 @@ export default function CommissionTab({ project }: CommissionTabProps) {
     }
   };
 
-  if (!isAdmin && role !== "viewer" && role !== "agent") return null;
+  if (!isAdmin && !isViewer && !isAgent) return null;
 
+  // Agent limited view
+  if (isAgent) {
+    return (
+      <div className="space-y-6">
+        <div className="max-w-xl mx-auto">
+          <Card className="rounded-3xl border-border shadow-sm overflow-hidden bg-card">
+            <CardHeader className="bg-primary text-primary-foreground border-b border-primary/10">
+              <CardTitle className="text-lg font-bold flex items-center gap-2">
+                <Calculator className="w-5 h-5" /> Commission Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-8 space-y-8">
+              <div className="grid grid-cols-1 gap-8">
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">Loan Amount</Label>
+                  <div className="text-2xl font-bold text-foreground">{formatCurrency(project.loanAmount)}</div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">Final Commission Received</Label>
+                  <div className="text-2xl font-bold text-foreground">{formatCurrency(formData.finalCommission)}</div>
+                  <p className="text-[10px] text-muted-foreground italic">Actual amount received by the company from the bank.</p>
+                </div>
+
+                <div className="pt-6 border-t border-border">
+                  <div className="bg-emerald-500/10 p-6 rounded-2xl border border-emerald-500/20">
+                    <Label className="text-emerald-700 font-bold uppercase text-[10px] tracking-widest">Your Final Payout</Label>
+                    <div className="text-3xl font-bold text-emerald-600 mt-1">{formatCurrency(finalAgentPayout)}</div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Admin/Viewer view (Full)
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

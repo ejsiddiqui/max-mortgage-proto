@@ -36,8 +36,37 @@ import { Search, Filter, LayoutGrid, List as ListIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 export default function ProjectsPage() {
-  const projects = useQuery(api.projects.list, {});
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [agentFilter, setAgentFilter] = useState("all");
+  const [bankFilter, setBankFilter] = useState("all");
+  const [borrowerTypeFilter, setBorrowerTypeFilter] = useState("all");
+
+  const projects = useQuery(api.projects.list, {
+    status: statusFilter === "all" ? undefined : statusFilter,
+    agentId: agentFilter === "all" ? undefined : agentFilter as any,
+    bankId: bankFilter === "all" ? undefined : bankFilter as any,
+    borrowerType: borrowerTypeFilter === "all" ? undefined : borrowerTypeFilter,
+    search: search || undefined,
+  });
+
+  const agents = useQuery(api.users.listAgents);
+  const banks = useQuery(api.banks.list);
+
   const changeStage = useMutation(api.projects.changeStage);
+
+  if (projects === undefined) {
+    return (
+      <div className="h-full flex flex-col gap-6 animate-pulse">
+        <div className="h-20 w-full bg-muted rounded-2xl" />
+        <div className="flex-1 flex gap-6 overflow-hidden">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="w-72 h-full bg-muted rounded-3xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const [activeId, setActiveId] = useState<any>(null);
   const [folModalProject, setFolModalProject] = useState<any>(null);
@@ -130,14 +159,64 @@ export default function ProjectsPage() {
     <div className="h-full flex flex-col gap-6">
       {/* Filters Bar */}
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-card p-4 rounded-2xl border border-border shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="relative w-64">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative w-full md:w-64">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder="Search projects..." className="pl-10 rounded-xl bg-muted border-border" />
+            <Input 
+              placeholder="Search projects..." 
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-10 rounded-xl bg-muted border-border" 
+            />
           </div>
-          <Button variant="outline" size="icon" className="rounded-xl border-border">
-            <Filter className="w-4 h-4" />
-          </Button>
+          
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[130px] rounded-xl bg-muted border-border">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl">
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="open">Open</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="on_hold">On Hold</SelectItem>
+              <SelectItem value="disbursed">Disbursed</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={agentFilter} onValueChange={setAgentFilter}>
+            <SelectTrigger className="w-[150px] rounded-xl bg-muted border-border">
+              <SelectValue placeholder="Agent" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl">
+              <SelectItem value="all">All Agents</SelectItem>
+              {agents?.map(a => (
+                <SelectItem key={a._id} value={a._id}>{a.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={bankFilter} onValueChange={setBankFilter}>
+            <SelectTrigger className="w-[150px] rounded-xl bg-muted border-border">
+              <SelectValue placeholder="Bank" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl">
+              <SelectItem value="all">All Banks</SelectItem>
+              {banks?.map(b => (
+                <SelectItem key={b._id} value={b._id}>{b.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={borrowerTypeFilter} onValueChange={setBorrowerTypeFilter}>
+            <SelectTrigger className="w-[150px] rounded-xl bg-muted border-border">
+              <SelectValue placeholder="Borrower" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl">
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="salaried">Salaried</SelectItem>
+              <SelectItem value="self_employed">Self Employed</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="flex items-center gap-2 bg-muted p-1 rounded-xl">
